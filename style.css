@@ -1,0 +1,97 @@
+/* Анимация клика */
+
+.click-value, .coin-animation {
+    position: absolute;
+    color: #FFD700; /* Желтый цвет */
+    font-size: 24px;
+    font-weight: bold; /* Жирный шрифт */
+    text-shadow: 1px 1px 2px black; /* Добавляем обводку */
+    animation: fadeOut 1s ease-out forwards;
+}
+
+@keyframes coinPop {
+    0% {
+        top: -20px;
+        opacity: 1;
+    }
+    100% {
+        top: -50px;
+        opacity: 0;
+    }
+}
+
+@keyframes fadeOut {
+    0% {
+        opacity: 1;
+        transform: translateY(-20px); /* Поднимаем выше */
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-80px); /* Поднимаем выше */
+    }
+}
+
+/* Нижнее меню */
+
+#bottom-menu {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #444;
+    display: flex;
+    justify-content: space-around;
+    border-top: 1px solid #555;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    border-radius: 15px 15px 0 0;
+    z-index: 10; /* Убедимся, что нижнее меню перекрывает остальные элементы */
+}
+
+.menu-item {
+    padding: 10px;
+    color: #fff;
+    text-align: center;
+    cursor: pointer;
+    flex-grow: 1;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    border-radius: 10px; /* Закругленные углы у каждого элемента */
+    padding-bottom: 20px;
+}
+
+.menu-item:hover {
+    background-color: #666;
+    color: #FFD700;
+}
+
+.menu-item.active {
+    background-color: #666;
+    color: #90ee90;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+}
+
+.menu-item i {
+    display: block;
+    font-size: 24px;
+    margin-bottom: 5px; /* Отступ между иконкой и текстом */
+}
+
+.menu-item span {
+    font-size: 14px; /* Размер текста */
+}
+
+
+/* Вырезаная кнопка скрытая */
+
+#reset-button {
+    margin-top: 20px;
+    padding: 10px 20px;
+    font-size: 18px;
+    background-color: #d9534f;
+    color: #fff;
+    border: 1px solid #d43f3a;
+    cursor: pointer;
+}
+
+#reset-button:hover {
+    background-color: #c9302c;
+}

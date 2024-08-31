@@ -1,0 +1,3312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Clicker</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+body {
+    background-color: #121212;
+    color: #ffffff;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    overflow: hidden;
+}
+
+.content-section {
+    display: none;
+}
+
+.content-section.active {
+    display: block;
+}
+
+.hidden {
+    display: none; !important;
+}
+
+#game-section {
+    position: relative;
+    margin-top: 10px; /* Уменьшенный отступ сверху */
+}
+
+#fighter-image {
+    width: 350px; /* Уменьшенный размер картинки */
+    cursor: pointer;
+    transition: transform 0.1s ease;
+}
+
+#fighter-image:active {
+    transform: scale(0.9);
+}
+
+#stats-section {
+    margin: 20px 0;
+    font-size: 24px;
+}
+
+.stat-item {
+    display: inline-block;
+    margin: 0 20px;
+    position: relative;
+}
+
+/* Статистика главного меню */
+
+.stat-container {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+    gap: 10px; /* Расстояние между квадратиками */
+}
+
+.stat-box {
+    background-color: #1e1e1e;
+    padding: 10px;
+    border-radius: 10px;
+    width: 30%;
+    color: #90ee90; /* Салатовый цвет */
+    text-align: center;
+    font-size: 14px; /* Уменьшенный размер шрифта */
+}
+
+.stat-box img {
+    width: 24px;
+    vertical-align: middle;
+    margin-right: 2px; /* Уменьшенный отступ между иконкой и значением */
+}
+
+.stat-box span, .stat-box .plus {
+    color: #ffffff; /* Белый цвет для цифр и символа "+" */
+}
+
+.stat-box.level-box {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.stat-box.level-box span {
+    font-size: 24px; /* Увеличенный размер шрифта для уровня */
+    line-height: 1.2; /* Вертикальное центрирование */
+}
+
+@keyframes pulse-slight {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.01);
+    }
+}
+
+.total-coins {
+    font-size: 35px;
+    margin-top: 10px; /* Уменьшенный отступ сверху */
+    margin-bottom: 10px; /* Уменьшенный отступ снизу */
+    font-weight: bold; /* Жирный шрифт */
+    animation: pulse-slight 2s infinite;
+}
+
+.total-coins img {
+    width: 32px;
+    vertical-align: middle;
+    margin-right: 2px; /* Уменьшенный отступ между иконкой и значением */
+}
+
+.user-info {
+    text-align: left;
+    margin-bottom: 10px; /* Отступ снизу для разделения */
+}
+
+.stat-item.level-text {
+    font-size: 16px; /* Уменьшенный размер шрифта для надписи "Уровень" */
+}
+.stat-item .level-number {
+    font-size: 16px; /* Уменьшенный размер шрифта для значения уровня */
+}
+
+.tap-notification {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #FFFFFF; /* Белый цвет */
+    text-shadow: 1px 1px 2px black; /* Тень текста */
+    animation: pulse-text 2s infinite;
+}
+
+@keyframes pulse-text {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+
+/* Основные стили для модальных окон */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.modal-content {
+    background-color: #1e1e1e;
+    margin: 10% auto;
+    padding: 20px;
+    border: 2px solid #90ee90;
+    width: 80%;
+    max-width: 600px;
+    color: white;
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(144, 238, 144, 0.8);
+    text-align: center;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: #fff;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+h2 {
+    font-size: 24px;
+    color: #90ee90; /* Салатовый цвет */
+    margin-bottom: 20px;
+    text-shadow: 0 0 10px rgba(144, 238, 144, 0.5);
+}
+
+p {
+    font-size: 18px;
+    margin-bottom: 20px;
+}
+
+.modal-button {
+    padding: 10px 20px;
+    font-size: 18px;
+    background-color: #90ee90; /* Салатовый цвет */
+    color: #000; /* Черный цвет текста */
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.modal-button:hover {
+    background-color: #77cc77; /* Более темный салатовый цвет */
+    color: #fff;
+    transform: translateY(-2px);
+}
+
+/* Золотой текст */
+.gold-text {
+    color: #FFD700; /* Золотой цвет для чисел и стоимости монет */
+    font-weight: bold;
+}
+
+/* Стиль для картинки монетки */
+.coin-image {
+    vertical-align: middle;
+    width: 24px;
+    height: 24px;
+    margin-left: 0px;
+}
+
+/* Стиль для текста с новой строки */
+.new-line {
+    display: block;
+    margin-top: 10px;
+    font-weight: bold;
+}
+    
+    #fightResultModal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.4);
+    }
+    
+    #fightResultModal .modal-content {
+        background-color: #333;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #555;
+        width: 80%;
+        max-width: 600px;
+        color: white;
+    }
+    
+    #fightResultModal .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+    
+    #fightResultModal .close:hover,
+    #fightResultModal .close:focus {
+        color: white;
+        text-decoration: none;
+        cursor: pointer;
+    }
+    
+    /* Стили для нового модального окна для реферальных улучшений */
+    #referralUpgradeModal .modal-content {
+        background-color: #2e2e2e;
+        color: #ffffff;
+        border-radius: 10px;
+        padding: 20px;
+        max-width: 500px;
+        margin: auto;
+        text-align: center;
+        position: fixed;
+        top: 30%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+    
+    #referralUpgradeModal .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+    
+    #referralUpgradeModal .close:hover,
+    #referralUpgradeModal .close:focus {
+        color: white;
+        text-decoration: none;
+        cursor: pointer;
+    }
+    
+    #referralUpgradeModal .modal-button {
+        padding: 10px 20px;
+        font-size: 16px;
+        background-color: #90ee90; /* Салатовый цвет */
+        color: #000; /* Черный цвет текста */
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    
+    #referralUpgradeModal .modal-button:hover {
+        background-color: #77cc77; /* Более темный салатовый цвет */
+        color: #fff; /* Белый цвет текста при наведении */
+    }
+        
+    /* Стили для нового модального окна */
+    #clickUpgradeModal .modal-content {
+        background-color: #1e1e1e;
+        color: #ffffff;
+        border-radius: 10px;
+        padding: 20px;
+        max-width: 500px;
+        margin: auto;
+        text-align: center;
+        position: fixed;
+        top: 30%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+    
+    
+    #absenceModal .modal-content {
+        background-color: #1e1e1e;
+        color: #ffffff;
+        border-radius: 10px;
+        padding: 20px;
+        max-width: 500px;
+        margin: auto;
+        text-align: center;
+        position: fixed;
+        top: 40%; /* Сдвинуть ниже */
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-weight: bold; /* Жирный шрифт */
+    }
+    
+    #absenceModal p span {
+        font-weight: bold; /* Жирный шрифт для текста */
+    }
+    
+    #absenceModal .coin-image {
+        vertical-align: middle;
+        width: 24px; /* Размер картинки */
+        height: 24px; /* Размер картинки */
+        margin-left: 0px; /* Отступ для картинки */
+    }
+    
+    /* Стиль для контейнера с реферальными монетами */
+    #referral-coins-container {
+        background-color: #000; /* Черная заливка */
+        border: 2px solid #90ee90; /* Зеленая обводка */
+        padding: 10px;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 20px;
+        box-shadow: 0 0 10px rgba(144, 238, 144, 0.5); /* Меньшая расплывчатая обводка */
+    }
+    
+    #referral-coins {
+        margin-right: 5px;
+    }
+    
+/* Основные стили для модальных окон */
+
+
+/* Основные стили боев */
+
+   #fights-section {
+        margin-top: 27px; /* Увеличенный отступ сверху */
+        text-align: center; /* Центрирование текста */
+        color: #ffffff; /* Белый цвет текста */
+        font-weight: bold; /* Жирный текст */
+    }
+    
+    .stats-box {
+        background-color: #1e1e1e;
+        padding: 20px;
+        border-radius: 10px;
+        width: calc(100% - 80px); /* Добавляем отступы справа и слева */
+        margin: 0 auto 20px; /* Центрируем блок и добавляем отступ снизу */
+        font-size: 18px; /* Размер шрифта */
+        box-shadow: 0 0 20px rgba(144, 238, 144, 0.8); /* Яркая размытая обводка */
+    }
+    
+    .stats-box div {
+        margin-bottom: 10px; /* Отступ между элементами */
+    }
+    
+    #bet-amount {
+        padding: 10px;
+        font-size: 18px;
+        background-color: #333;
+        color: #fff;
+        border: 1px solid #555;
+        border-radius: 10px; /* Скругленные края */
+        width: calc(100% - 80px); /* Ширина поля */
+        margin: 20px auto 10px; /* Центрирование и отступы сверху и снизу */
+        box-shadow: 0 0 20px rgba(144, 238, 144, 0.8) !important; /* Яркая размытая обводка */
+    }
+    
+    #start-fight-button {
+        padding: 10px 20px;
+        font-size: 18px;
+        background-color: #90ee90; /* Салатовый цвет */
+        color: #333; /* Темный текст */
+        border: none;
+        cursor: pointer;
+        border-radius: 25px; /* Круглые края */
+        width: calc(100% - 80px); /* Ширина кнопки */
+        margin: 0 auto; /* Центрирование */
+        transition: background-color 0.3s, transform 0.3s;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    #start-fight-button:hover {
+        background-color: #77dd77; /* Более яркий салатовый цвет при наведении */
+        transform: translateY(-2px);
+    }
+    
+    .remaining-fights {
+        font-size: 14px;
+        color: #90ee90; /* Салатовый цвет */
+        margin-top: 10px; /* Уменьшенный отступ сверху */
+        margin-bottom: 20px; /* Отступ снизу */
+    }
+    
+    #fight-area {
+        margin-top: 20px; /* Отступ сверху для бойцовской зоны */
+    }
+    
+    #fight-area div {
+        margin-bottom: 10px; /* Отступ между элементами */
+        font-size: 15px; /* Большой размер текста */
+        font-weight: bold; /* Жирный текст */
+    }
+    
+    #fight-area .scores {
+        display: flex;
+        justify-content: space-between;
+        padding: 0 30px;
+    }
+    
+    #fight-timer {
+        font-size: 15px; /* Большой размер текста */
+        font-weight: bold; /* Жирный текст */
+        margin-top: 20px;
+    }
+    
+    #click-image {
+        width: 300px; /* Увеличенная ширина */
+        cursor: pointer;
+        transition: transform 0.1s ease;
+    }
+    
+    #click-image:active {
+        transform: scale(0.9);
+        animation: clickAnimation 0.3s ease;
+    }
+    
+    @keyframes clickAnimation {
+        0% { transform: scale(1); }
+        50% { transform: scale(0.9); }
+        100% { transform: scale(1); }
+    }
+    
+    .coin-animation {
+        position: absolute;
+        font-size: 16px;
+        color: #FFD700;
+        opacity: 0;
+        animation: coinPop 1s ease-out forwards;
+    }
+    
+    @keyframes coinPop {
+        0% {
+            top: -20px;
+            opacity: 1;
+        }
+        100% {
+            top: -50px;
+            opacity: 0;
+        }
+    }
+    
+    .notification {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0.5);
+        padding: 20px;
+        background-color: transparent; /* Убираем фон */
+        color: white;
+        font-size: 50px; /* Большой шрифт */
+        font-weight: bold; /* Жирный текст */
+        opacity: 0;
+        transition: opacity 0.5s ease, transform 0.5s ease;
+        z-index: 1000;
+        text-align: center; /* Центрирование текста */
+    }
+    
+    .notification.visible {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    
+    .bet-display {
+        background-color: #1e1e1e; /* Такой же фон, как у .stats-box */
+        color: #ffffff; /* Белый текст */
+        padding: 10px; /* Меньше padding */
+        border-radius: 10px;
+        width: calc(100% - 80px);
+        margin: 10px auto 10px; /* Меньше margin */
+        font-size: 30px; /* Меньше размер текста */
+        font-weight: bold; /* Жирный текст */
+        box-shadow: 0 0 20px rgba(144, 238, 144, 0.8);
+        text-align: center; /* Центрирование текста */
+    }
+    
+    .rules-box {
+        background-color: #1e1e1e;
+        padding: 20px;
+        border-radius: 10px;
+        width: calc(100% - 80px);
+        margin: 0 auto 20px;
+        font-size: 18px;
+        color: #ff6f61; /* Красный цвет текста */
+        box-shadow: 0 0 20px rgba(255, 99, 71, 0.8); /* Обводка в красных оттенках */
+        text-align: left; /* Выравнивание текста по левому краю */
+    }
+
+    
+/* Основные стили боев */
+
+
+/* КВЕСТЫ */
+    #quests-section {
+        padding: 20px;
+        text-align: center;
+        color: #ffffff; /* Белый цвет для текста */
+        position: relative;
+        height: calc(100vh - 60px);
+        overflow-y: auto;
+    }
+    
+    .spacer {
+        height: 60px; /* Высота фиктивного элемента равна высоте нижнего меню */
+    }
+
+    .referral-link-box {
+        background-color: #1e1e1e;
+        padding: 10px;
+        border-radius: 10px;
+        width: calc(100% - 20px); /* Добавляем отступы справа и слева */
+        color: #ffffff; /* Белый цвет */
+        text-align: center;
+        font-size: 18px; /* Размер шрифта */
+        margin: 0 auto 20px; /* Центрируем блок и добавляем отступ снизу */
+        font-weight: bold; /* Жирный текст */
+        box-shadow: 0 0 20px 10px rgba(144, 238, 144, 0.5); /* Размытая обводка салатового цвета */
+    }
+
+    #quests-section a {
+        color: #ffffff; /* Белый цвет для ссылок */
+        text-decoration: none;
+        font-weight: bold; /* Жирный текст */
+    }
+
+    #quests-section a:hover {
+        text-decoration: underline;
+    }
+    
+    @keyframes colorPulse {
+        0%, 100% {
+            background-color: #90ee90;
+            box-shadow: 0 0 10px #90ee90;
+        }
+        33% {
+            background-color: #77dd77;
+            box-shadow: 0 0 20px #77dd77;
+        }
+        66% {
+            background-color: #00BFFF; /* Изменен на более яркий голубой (Deep Sky Blue) */
+            box-shadow: 0 0 20px #00BFFF;
+        }
+    }
+    
+    @keyframes scalePulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+    }
+    
+    #invite-button {
+        padding: 10px 20px;
+        font-size: 16px;
+        color: #333;
+        border: none;
+        cursor: pointer;
+        border-radius: 25px;
+        margin-top: 10px;
+        transition: transform 0.3s;
+        animation: colorPulse 6s infinite, scalePulse 2s infinite;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    #invite-button::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 70%);
+        transform: rotate(45deg);
+        animation: shimmer 3s infinite;
+    }
+    
+    @keyframes shimmer {
+        0% {
+            transform: rotate(45deg) translate(-50%, -50%);
+        }
+        100% {
+            transform: rotate(45deg) translate(50%, 50%);
+        }
+    }
+    
+    #invite-button:hover {
+        transform: translateY(-2px) scale(1.05);
+        animation-play-state: paused;
+    }
+
+    .copy-info {
+        font-size: 14px;
+        color: #ffffff; /* Белый цвет */
+        margin-top: 10px;
+        text-align: left; /* Выравнивание текста по левому краю */
+        font-weight: bold; /* Жирный текст */
+    }
+
+    .copy-info img {
+        vertical-align: middle;
+        margin-left: 5px;
+        width: 16px;
+        height: 16px;
+    }
+
+    .highlighted-text {
+        color: #90ee90; /* Яркий салатовый цвет */
+        text-align: center; /* Центрирование текста */
+    }
+
+    .task-item {
+        background-color: #1e1e1e;
+        padding: 20px;
+        margin-bottom: 15px;
+        border-radius: 10px;
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* Центрируем надписи */
+        color: #90ee90; /* Яркий салатовый цвет */
+        box-shadow: 0 0 20px 10px rgba(144, 238, 144, 0.5); /* Размытая обводка салатового цвета */
+    }
+
+    .task-item-title {
+        font-size: 14px;
+        font-weight: bold;
+        margin-bottom: 10px;
+        text-align: center; /* Центрируем текст */
+    }
+
+    .task-item-reward {
+        font-size: 16px;
+        color: #ffffff; /* Белый цвет для награды */
+        display: flex;
+        align-items: center;
+        justify-content: center; /* Центрируем награду */
+        margin-bottom: 10px;
+        font-weight: bold; /* Жирный текст */
+    }
+
+    .task-item-reward img {
+        margin-left: 5px;
+        width: 16px;
+        height: 16px;
+    }
+
+    .task-buttons {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        align-items: center;
+    }
+
+    .task-visit-button,
+    .task-check-button {
+        padding: 10px 20px;
+        font-size: 14px;
+        background-color: #90ee90; /* Салатовый цвет */
+        color: #333; /* Темный текст */
+        border: none;
+        cursor: pointer;
+        border-radius: 25px; /* Круглые края */
+        width: 100%;
+        margin-top: 10px;
+        transition: background-color 0.3s, transform 0.3s;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .task-visit-button:hover,
+    .task-check-button:hover {
+        background-color: #77dd77; /* Более яркий салатовый цвет при наведении */
+        transform: translateY(-2px);
+    }
+
+    .task-check-button[disabled] {
+        background-color: #777;
+        cursor: not-allowed;
+    }
+    
+    .referral-coins-info {
+        margin-top: 10px;
+        padding: 10px;
+        font-size: 16px;
+        color: #ffffff; /* Белый цвет */
+        display: flex;
+        align-items: center;
+        justify-content: center; /* Центрирование */
+        font-weight: bold; /* Жирный текст */
+        border: 2px solid #ff4500; /* Красная обводка */
+        border-radius: 10px; /* Скругленные углы */
+        background-color: #2e2e2e; /* Темный фон */
+        box-shadow: 0 0 10px 2px rgba(255, 69, 0, 0.5); /* Красная тень */
+    }
+    
+    .referral-coins-info img {
+        margin-left: 5px;
+        width: 16px;
+        height: 16px;
+    }
+/* КВЕСТЫ */
+
+
+/* УЛУЧШЕНИЯ */
+.upgrades-section {
+    margin-top: 20px;
+    max-height: calc(100vh - 150px); /* Используем calc для динамического расчета высоты */
+    overflow-y: auto; /* Добавляем вертикальную прокрутку */
+    padding-bottom: 0; /* Убираем нижний отступ */
+    position: relative;
+}
+
+/* Добавляем фиктивный элемент для создания пространства внизу */
+.upgrades-section::after {
+    content: '';
+    display: block;
+    height: 150px; /* Высота, которая соответствует высоте нижнего меню */
+}
+
+.upgrade-button {
+    padding: 10px;
+    font-size: 18px;
+    background-color: #333;
+    color: #fff;
+    border: 1px solid #555;
+    cursor: pointer;
+}
+
+.upgrade-button:hover {
+    background-color: #555;
+}
+
+#upgrades-stats {
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 0;
+    border-bottom: 1px solid #555;
+}
+
+.sub-menu {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 0px;
+    background-color: #444; /* Фон вкладок */
+    border-radius: 10px; /* Закругленные углы */
+    margin-top: -10px; /* Поднимаем блок выше */
+    height: 44px; /* Уменьшаем высоту */
+    align-items: center; /* Вертикальное выравнивание */
+}
+
+.sub-menu-item {
+    flex-grow: 1;
+    padding: 5px; /* Уменьшаем внутренний отступ */
+    color: #fff;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    border-radius: 10px; /* Закругленные углы у каждого элемента */
+    margin: 0 5px; /* Расстояние между элементами */
+    font-size: 14px; /* Уменьшаем размер шрифта */
+}
+
+.sub-menu-item:hover {
+    background-color: #666;
+    color: #FFD700;
+}
+
+.sub-menu-item.active {
+    background-color: #666;
+    color: #90ee90;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+}
+
+.upgrades-multiplier-box {
+    background-color: #1e1e1e;
+    padding: 10px;
+    border-radius: 10px;
+    width: calc(100% - 20px); /* Добавляем отступы справа и слева */
+    color: #90ee90; /* Салатовый цвет */
+    font-size: 18px; /* Размер шрифта */
+    margin: 0 auto; /* Центрируем блок */
+    display: flex;
+    justify-content: center; /* Выравниваем текст и значение по центру */
+    align-items: center; /* Центрируем по вертикали */
+    gap: 10px; /* Добавляем расстояние между элементами */
+}
+
+
+.upgrade-stat-box {
+    background-color: #1e1e1e;
+    padding: 10px;
+    border-radius: 10px;
+    width: 30%;
+    color: #90ee90; /* Салатовый цвет */
+    text-align: center;
+    font-size: 14px; /* Уменьшенный размер шрифта */
+    margin-bottom: 10px;
+}
+
+.upgrade-stat-box img {
+    width: 24px;
+    vertical-align: middle;
+    margin-right: 2px; /* Уменьшенный отступ между иконкой и значением */
+}
+
+.upgrade-stat-box span, .upgrade-stat-box .plus {
+    color: #ffffff; /* Белый цвет для цифр и символа "+" */
+}
+
+
+/* Улучшение улучшений */
+
+.upgrade-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Два столбца */
+    gap: 20px; /* Расстояние между квадратиками */
+    justify-items: center; /* Центрирование содержимого по горизонтали */
+    margin: 20px;
+}
+
+.upgrade-box {
+    background-color: #1e1e1e;
+    padding: 10px; /* Уменьшенная высота и ширина */
+    border-radius: 10px;
+    width: 80%; /* Уменьшенная ширина */
+    color: #90ee90; /* Салатовый цвет */
+    text-align: center;
+    font-size: 16px; /* Уменьшенный размер шрифта */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer; /* Делает коробочку кликабельной */
+    transition: transform 0.2s ease; /* Анимация при наведении */
+}
+
+.upgrade-box:hover {
+    transform: scale(1.05); /* Увеличение при наведении */
+}
+
+.upgrade-box img {
+    width: 70px; /* Увеличенный размер картинки */
+    height: 70px;
+    margin-bottom: 10px;
+}
+
+.upgrade-box .upgrade-title {
+    margin: 5px 0; /* Уменьшенный отступ */
+    font-size: 16px;
+    color: #ffffff; /* Белый цвет для названия */
+}
+
+.upgrade-box .upgrade-cost {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    color: #ffd700;
+}
+
+.upgrade-cost img {
+    width: 16px;
+    height: 16px;
+    margin-right: 5px;
+    vertical-align: middle;
+    line-height: 24px; /* Устанавливаем line-height для изображения */
+    margin-top: 10px; /* Добавляем отступ сверху */
+}
+
+.upgrade-cost span {
+    display: inline-block;
+    vertical-align: middle;
+    line-height: 24px; /* Устанавливаем line-height для текста */
+}
+
+
+/* Стили для окна с кликами*/
+
+.upgrade-box-click {
+    background-color: #1e1e1e;
+    padding: 10px; /* Уменьшенная высота и ширина */
+    border-radius: 10px;
+    width: 80%; /* Уменьшенная ширина */
+    color: #90ee90; /* Салатовый цвет */
+    text-align: center;
+    font-size: 16px; /* Уменьшенный размер шрифта */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer; /* Делает коробочку кликабельной */
+    transition: transform 0.2s ease; /* Анимация при наведении */
+}
+
+.upgrade-box-click:hover {
+    transform: scale(1.05); /* Увеличение при наведении */
+}
+
+.upgrade-box-click img {
+    width: 70px; /* Увеличенный размер картинки */
+    height: 70px;
+    margin-bottom: 10px;
+}
+
+.upgrade-box-click .upgrade-title {
+    margin: 5px 0; /* Уменьшенный отступ */
+    font-size: 16px;
+    color: #ffffff; /* Белый цвет для названия */
+}
+
+.upgrade-box-click .upgrade-cost {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    color: #ffd700;
+}
+
+.upgrade-box-click .upgrade-cost img {
+    width: 16px;
+    height: 16px;
+    margin-right: 5px;
+    vertical-align: middle;
+    line-height: 24px; /* Устанавливаем line-height для изображения */
+    margin-top: 10px; /* Добавляем отступ сверху */
+}
+
+.upgrade-box-click .upgrade-cost span {
+    display: inline-block;
+    vertical-align: middle;
+    line-height: 24px; /* Устанавливаем line-height для текста */
+}
+
+.upgrade-box.locked,
+.upgrade-box-click.locked {
+    background-color: #333;
+    color: #777;
+    cursor: not-allowed;
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+/* Стили для окна с реферал*/
+
+.ref-upgrade-box {
+    background-color: #1e1e1e;
+    padding: 10px; /* Уменьшенная высота и ширина */
+    border-radius: 10px;
+    width: 80%; /* Уменьшенная ширина */
+    color: #90ee90; /* Салатовый цвет */
+    text-align: center;
+    font-size: 16px; /* Уменьшенный размер шрифта */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer; /* Делает коробочку кликабельной */
+    transition: transform 0.2s ease; /* Анимация при наведении */
+}
+
+.ref-upgrade-box:hover {
+    transform: scale(1.05); /* Увеличение при наведении */
+}
+
+.ref-upgrade-box img {
+    width: 70px; /* Увеличенный размер картинки */
+    height: 70px;
+    margin-bottom: 10px;
+}
+
+.ref-upgrade-box .upgrade-title {
+    margin: 5px 0; /* Уменьшенный отступ */
+    font-size: 16px;
+    color: #ffffff; /* Белый цвет для названия */
+}
+
+.ref-upgrade-box .upgrade-cost {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    color: #ffd700;
+}
+
+.ref-upgrade-box .upgrade-cost img {
+    width: 16px;
+    height: 16px;
+    margin-right: 5px;
+    vertical-align: middle;
+    line-height: 24px; /* Устанавливаем line-height для изображения */
+    margin-top: 10px; /* Добавляем отступ сверху */
+}
+
+.ref-upgrade-box .upgrade-cost span {
+    display: inline-block;
+    vertical-align: middle;
+    line-height: 24px; /* Устанавливаем line-height для текста */
+}
+
+.sub-content {
+    margin: 0; /* Убираем внешний отступ */
+    padding: 0; /* Убираем внутренний отступ */
+}
+
+/* Progress Bar Styles */
+.progress-bar-container {
+    background-color: #333;
+    border-radius: 20px;
+    overflow: hidden;
+    width: 80%;
+    margin: 10px auto 1px auto;  /* Уменьшенный отступ между общим числом монет и загрузочной полосой */
+}
+
+.progress-bar {
+    background-color: #4caf50;
+    height: 30px;
+    width: 0; /* Dynamically set width based on level progress */
+}
+/* УЛУЧШЕНИЯ */
+
+
+
+
+
+
+
+    </style>
+</head>
+<body>
+    <div id="game-section" class="content-section active">
+        <div class="user-info">
+            Пользователь: Типо техноблогер?  (ID: 7140328728)
+        </div>
+        <div id="stats-section">
+            <div class="stat-container">
+                <div class="stat-box">
+                    Прибыль за тап<br>
+                    <img src="/image/coin.png" alt="Coin"> <span class="plus">+</span><span id="coins-per-click">0</span>
+                </div>
+                <div class="stat-box level-box">
+                    Множитель<br>
+                    <span id="user-multiplier">1.0</span>
+                </div>
+                <div class="stat-box">
+                    Прибыль в час<br>
+                    <img src="/image/coin.png" alt="Coin"> <span class="plus">+</span><span id="coins-per-second">103</span>
+                </div>
+            </div>
+            <div class="total-coins">
+                <img src="/image/coin.png" alt="Coin"> <span id="score-value">2 241</span>
+            </div>
+        
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="level-progress-bar"></div>
+            </div>
+            <div class="stat-item level-text">
+                Уровень <span class="level-number" id="user-level">1</span>/10
+            </div>
+        </div>
+        <img src="image/tapcoin.jpg" id="fighter-image" alt="TapCoin">
+        <div class="tap-notification">
+            Сейчас есть шанс выбить кейс<br>ТАПАЙ!
+        </div>
+        <button id="reset-button" class="hidden">Сбросить прогресс</button>
+        <div class="invisible hidden">
+                            <div class="stat-item hidden">Дата последнего выхода: <span id="last-logout-time">2024-08-31 16:17:19</span></div>
+                <div class="stat-item hidden">Секунд с последнего выхода: <span id="seconds-since-last-logout">76</span></div>
+                    </div>
+    </div>
+    
+    
+    
+    
+        <div id="upgrades-section" class="content-section hidden">
+            <div class="upgrades-multiplier-box">
+                Ваш множитель<br>
+                <span id="multiplier-value">1.0</span>
+            </div>
+            <div id="upgrades-stats" class="stat-container">
+                <div class="upgrade-stat-box">
+                    Количество монет<br>
+                    <span id="upgrade-score-value">2241</span>
+                </div>
+                <div class="upgrade-stat-box">
+                    Прибыль за тап<br>
+                    <img src="/image/coin.png" alt="Coin"> <span class="plus">+</span><span id="coins-per-click">0</span>
+                </div>
+                <div class="upgrade-stat-box">
+                    Прибыль в час<br>
+                    <img src="/image/coin.png" alt="Coin"> <span class="plus">+</span><span id="upgrade-coins-per-second">103</span>
+                </div>
+            </div>
+            <div class="sub-menu">
+                <div class="sub-menu-item active" data-sub-page="click-upgrades">Клики</div>
+                <div class="sub-menu-item" data-sub-page="training">Заработок</div>
+                <div class="sub-menu-item" data-sub-page="gym">Бизнес</div>
+                <div class="sub-menu-item" data-sub-page="tournaments">Особые</div>
+            </div>
+            <div id="click-upgrades" class="sub-content active upgrades-section">
+                <div class="upgrade-container">
+                    <div class="upgrade-box-click" data-id="1">
+                        <img src="/image/upgrade/1_1.png" alt="Удар скорости">
+                        <div class="upgrade-title">Подработка руками</div>
+                        <div class="upgrade-cost"><img src="/image/coin.png" alt="Coin"> 3300</div>
+                    </div>
+                    <div class="upgrade-box-click" data-id="2">
+                        <img src="/image/upgrade/1_2.png" alt="Быстрый джеб">
+                        <div class="upgrade-title">Навыки доставщика</div>
+                        <div class="upgrade-cost"><img src="/image/coin.png" alt="Coin"> 6300</div>
+                    </div>
+                    <div class="upgrade-box-click" data-id="3">
+                        <img src="/image/upgrade/1_3.png" alt="Точный апперкот">
+                        <div class="upgrade-title">Таксануть</div>
+                        <div class="upgrade-cost">
+                            <img src="/image/coin.png" alt="Coin"> 
+                            <span>57900</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="training" class="sub-content hidden upgrades-section">
+                <div class="upgrade-container">
+                    <div class="upgrade-box" data-id="4">
+                        <img src="/image/upgrade/2_1.png" alt="Удар мощи">
+                        <div class="upgrade-title">Выгодный айфон на авито</div>
+                        <div class="upgrade-cost"><img src="/image/coin.png" alt="Coin"> 235</div>
+                    </div>
+                    <div class="upgrade-box" data-id="5">
+                        <img src="/image/upgrade/2_2.png" alt="Сокрушительный апперкот">
+                        <div class="upgrade-title">Вендинговый аппарат</div>
+                        <div class="upgrade-cost"><img src="/image/coin.png" alt="Coin"> 400</div>
+                    </div>
+                    <div class="upgrade-box" data-id="6">
+                        <img src="/image/upgrade/2_3.png" alt="Мощный хук">
+                        <div class="upgrade-title">Машина под перепродажу</div>
+                        <div class="upgrade-cost"><img src="/image/coin.png" alt="Coin"> 575</div>
+                    </div>
+                    <div class="upgrade-box" data-id="7">
+                        <img src="/image/upgrade/2_4.png" alt="Мега удар">
+                        <div class="upgrade-title">Машину в аренду</div>
+                        <div class="upgrade-cost"><img src="/image/coin.png" alt="Coin"> 805</div>
+                    </div>
+                    <div class="upgrade-box" data-id="8">
+                        <img src="/image/upgrade/2_5.png" alt="Удар торнадо">
+                        <div class="upgrade-title">Продажа паленых кроссовок</div>
+                        <div class="upgrade-cost"><img src="/image/coin.png" alt="Coin"> 1150</div>
+                    </div>
+                    <div class="upgrade-box" data-id="9">
+                        <img src="/image/upgrade/2_6.png" alt="Крушитель черепов">
+                        <div class="upgrade-title">Ремонт айфонов</div>
+                        <div class="upgrade-cost"><img src="/image/coin.png" alt="Coin"> 1495</div>
+                    </div>
+                    <div class="upgrade-box" data-id="10">
+                        <img src="/image/upgrade/2_7.png" alt="Критический удар">
+                        <div class="upgrade-title">Фастфуд на колёсах</div>
+                        <div class="upgrade-cost"><img src="/image/coin.png" alt="Coin"> 1840</div>
+                    </div>
+                    <div class="upgrade-box" data-id="11">
+                        <img src="/image/upgrade/2_8.png" alt="Удар чемпиона">
+                        <div class="upgrade-title">Точка шавермы</div>
+                        <div class="upgrade-cost"><img src="/image/coin.png" alt="Coin"> 2185</div>
+                    </div>
+                    <div class="upgrade-box" data-id="12">
+                        <img src="/image/upgrade/2_9.png" alt="Сверхмощный джеб">
+                        <div class="upgrade-title">Открыть ларёк</div>
+                        <div class="upgrade-cost"><img src="/image/coin.png" alt="Coin"> 2530</div>
+                    </div>
+                    <div class="upgrade-box" data-id="13">
+                        <img src="/image/upgrade/2_10.png" alt="Удар звезды">
+                        <div class="upgrade-title">Однушка под сдачу</div>
+                        <div class="upgrade-cost"><img src="/image/coin.png" alt="Coin"> 2875</div>
+                    </div>
+                </div>
+            </div>
+            <div id="gym" class="sub-content hidden upgrades-section">
+                <div class="upgrade-container">
+                    <div class="upgrade-box" data-id="14">
+                        <img src="/image/upgrade/3_1.png" alt="Качаем бицепсы">
+                        <div class="upgrade-title">Точка скупки айфонов</div>
+                        <div class="upgrade-cost"><img src="/image/coin.png" alt="Coin"> 17094</div>
+                    </div>
+                    <div class="upgrade-box" data-id="15">
+                        <img src="/image/upgrade/3_2.png" alt="День ног">
+                        <div class="upgrade-title">Точка разливайки</div>
+                        <div class="upgrade-cost"><img src="/image/coin.png" alt="Coin"> 28446</div>
+                    </div>
+                    <div class="upgrade-box" data-id="16">
+                        <img src="/image/upgrade/3_3.png" alt="Усиление выносливости">
+                        <div class="upgrade-title">Магазин на вайлдберисе</div>
+                        <div class="upgrade-cost"><img src="/image/coin.png" alt="Coin"> 56925</div>
+                    </div>
+                    <div class="upgrade-box" data-id="17">
+                        <img src="/image/upgrade/3_4.png" alt="Тренировка силы">
+                        <div class="upgrade-title">Двушка под сдачу</div>
+                        <div class="upgrade-cost"><img src="/image/coin.png" alt="Coin"> 72450</div>
+                    </div>
+                    <div class="upgrade-box" data-id="18">
+                        <img src="/image/upgrade/3_5.png" alt="Кардио тренировка">
+                        <div class="upgrade-title">Дом под сдачу</div>
+                        <div class="upgrade-cost"><img src="/image/coin.png" alt="Coin"> 103500</div>
+                    </div>
+                    <div class="upgrade-box" data-id="19">
+                        <img src="/image/upgrade/3_6.png" alt="Интенсивный спарринг">
+                        <div class="upgrade-title">Земельный участок</div>
+                        <div class="upgrade-cost"><img src="/image/coin.png" alt="Coin"> 134550</div>
+                    </div>
+                    <div class="upgrade-box" data-id="20">
+                        <img src="/image/upgrade/3_7.png" alt="Увеличение массы">
+                        <div class="upgrade-title">Строительство отеля</div>
+                        <div class="upgrade-cost"><img src="/image/coin.png" alt="Coin"> 165600</div>
+                    </div>
+                    <div class="upgrade-box" data-id="21">
+                        <img src="/image/upgrade/3_8.png" alt="Профессиональный фитнес">
+                        <div class="upgrade-title">Ломбард</div>
+                        <div class="upgrade-cost"><img src="/image/coin.png" alt="Coin"> 196650</div>
+                    </div>
+                    <div class="upgrade-box" data-id="22">
+                        <img src="/image/upgrade/3_9.png" alt="Легочный объем">
+                        <div class="upgrade-title">Свой блог</div>
+                        <div class="upgrade-cost"><img src="/image/coin.png" alt="Coin"> 227700</div>
+                    </div>
+                    <div class="upgrade-box" data-id="23">
+                        <img src="/image/upgrade/3_10.png" alt="Железные мышцы">
+                        <div class="upgrade-title">Яхта под сдачу</div>
+                        <div class="upgrade-cost"><img src="/image/coin.png" alt="Coin"> 258750</div>
+                    </div>
+                </div>
+            </div>
+            <div id="tournaments" class="sub-content hidden upgrades-section">
+                <div class="upgrade-container">
+                    <div class="ref-upgrade-box" data-id="1">
+                        <img src="/image/upgrade/4_1.png" alt="Турнир новичков">
+                        <div class="upgrade-title">Вписать в тему друга</div>
+                        <div class="upgrade-cost">
+                            <img src="/image/coinref.png" alt="Coin">
+                            <span>2</span>
+                        </div>
+                    </div>
+                    <div class="ref-upgrade-box" data-id="2">
+                        <img src="/image/upgrade/4_2.png" alt="Местный чемпионат">
+                        <div class="upgrade-title">Собрать команду</div>
+                        <div class="upgrade-cost">
+                            <img src="/image/coinref.png" alt="Coin">
+                            <span>5</span>
+                        </div>
+                    </div>
+                    <div class="ref-upgrade-box" data-id="3">
+                        <img src="/image/upgrade/4_3.png" alt="Городской бой">
+                        <div class="upgrade-title">Гений нетворкинга</div>
+                        <div class="upgrade-cost">
+                            <img src="/image/coinref.png" alt="Coin">
+                            <span>10</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <!-- Вкладка квестов -->
+    <div id="quests-section" class="content-section hidden">
+        <div class="stat-item referral-link-box">
+            <div class="referral-link">
+                Реферальная ссылка: <a href="https://t.me/temki_coin_bot?start=r_7140328728">https://t.me/temki_coin_bot?start=r_7140328728</a>
+            </div>
+            <button id="invite-button">Пригласить друзей</button>
+            <div class="copy-info">
+                За каждого приглашённого игрока вы сразу получите:
+                <ul>
+                    <li>50000<img src="image/coin.png" alt="coin"></li>
+                    <li>4<img src="image/coinref.png" alt="refcoin"> реферальных монет!</li>
+                    <li>2 Реферальных сундука!</li>
+                </ul>
+                <div class="highlighted-text">Реферальные монеты позволяют покупать множители! Для корректного получения награды вы должны быть оффлайн.</div>
+            </div>
+            <div class="referral-coins-info">
+                Ваши реферальные монеты: <span id="referral-coins-stat">0</span><img src="image/coinref.png" alt="refcoin">
+            </div>
+        </div>
+        <div id="tasks-list">
+            <div class="stat-item">
+                <h3>Задания</h3>
+            </div>
+            <div class="task-item" data-task-id="9080"><div><div class="task-item-title">Подписаться на наш канал</div><div class="task-item-reward">50000 <img src="image/coin.png" alt="coin"></div></div><div class="task-buttons"><button class="task-visit-button" data-url="https://t.me/Temki_coin_tg">Перейти</button><button class="task-check-button" data-status="pending" data-task-id="9080" >Проверить</button></div></div>        </div>
+        <div class="spacer"></div> <!-- Фиктивный элемент -->
+    </div>
+
+        
+
+
+    <!-- Вкладка боев -->
+    <div id="fights-section" class="content-section hidden">
+        <div class="stats-box">
+            <div id="level-section">
+                Ваш уровень: <span id="user-level">1</span>
+            </div>
+            <div class="stat-item">
+                Количество боев в день: <span id="daily-fight-count">0</span>
+            </div>
+            <div class="stat-item">
+                Максимальная ставка: <span id="max-bet">0</span>
+            </div>
+        </div>
+        <input type="number" id="bet-amount" placeholder="Введите ставку" min="1">
+        <button id="start-fight-button">Начать бой</button>
+        <div class="remaining-fights">
+            Осталось боев сегодня: <span id="remaining-fights">0</span>
+        </div>
+        <div class="rules-box">
+            <div>Правила:</div>
+            <div>- Засчитываются только нажатия одним пальцем, многократное нажатие засчитываться не будет</div>
+            <div>- Перерыв между боями 10 минут</div>
+            <div>- При выходе из игры - бой автоматически будет проигран</div>
+        </div>
+        <div id="loading-opponent" class="hidden">Подбор соперника...</div>
+        <div id="opponent-found" class="hidden">Ваш противник определен: <span id="opponent-id"></span></div>
+        <div id="fight-area" class="hidden">
+            <div class="scores">
+                <div>Очки игрока: <span id="player-score">0</span></div>
+                <div>Очки противника: <span id="bot-score">0</span></div>
+            </div>
+            <div>Время до конца боя: <span id="fight-timer">60</span> секунд</div>
+            <img id="click-image" src="image/fighter.png" alt="Click Me"> <!-- Картинка для клика -->
+        </div>
+        <div id="fight-result" class="hidden"></div>
+    </div>
+
+
+    <div id="bottom-menu">
+        <div class="menu-item active" data-page="game-section">
+            <i class="fas fa-home"></i>
+            <span>Главная</span>
+        </div>
+        <div class="menu-item" data-page="upgrades-section">
+            <i class="fas fa-arrow-up"></i>
+            <span>Улучшения</span>
+        </div>
+        <div class="menu-item" data-page="quests-section">
+            <i class="fas fa-tasks"></i>
+            <span>Задания</span>
+        </div>
+        <div class="menu-item" data-page="fights-section">
+            <i class="fas fa-fist-raised"></i>
+            <span>Бои</span>
+        </div>
+        <div class="menu-item chests" data-page="chests-section"> <!-- Добавлен класс "chests" -->
+            <i class="fas fa-box"></i>
+            <span>Кейсы</span>
+        </div>
+    </div>  
+    
+    <style>
+#chests-section .chest-item {
+    border: 2px solid #ffffff;
+    border-radius: 10px;
+    padding: 10px;
+    text-align: center;
+    margin: 10px;
+    display: inline-block;
+    width: 70%;
+    box-sizing: border-box;
+    box-shadow: 0 0 15px 5px rgba(255, 255, 255, 0.5); /* Размытая светящаяся обводка */
+}
+
+#chests-section .chest-item img {
+    width: 25%;
+}
+
+#chests-section .chest-title {
+    font-weight: bold; /* Жирный текст */
+}
+
+#chests-section .chest-quantity {
+    margin-top: 5px;
+    color: #FFFFFF;
+    font-size: 16px;
+}
+
+#chests-section .chest-price {
+    margin-top: 5px;
+    color: #FFD700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#chests-section .coin-image-chest {
+    width: 16px !important; /* Размер монетки */
+    height: auto; /* Сохранение пропорций */
+    vertical-align: middle;
+    margin: 0 3px !important;
+}
+
+
+#chestModal .chest-price {
+    margin-top: 5px;
+    color: #FFD700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#chestModal .coin-image-chest {
+    width: 16px; /* Размер монетки */
+    height: 16px; /* Высота монетки */
+    vertical-align: middle;
+    margin-right: 3px;
+}
+
+
+#chestModal .coin-image {
+    width: 10px; /* Размер монетки */
+    height: 10px; /* Высота монетки */
+    vertical-align: middle;
+    margin-right: 3px;
+}
+
+.prizes-container {
+    display: flex;
+    overflow: hidden;
+    width: 100%;
+    height: 120px; /* Увеличена высота контейнера */
+    border: 2px solid #fff;
+    background-color: #333;
+    margin: 20px 0;
+    position: relative; /* Для позиционирования стрелок относительно контейнера */
+    align-items: center; /* Центрирование призов по вертикали */
+}
+
+#prizesWrapper {
+    display: flex;
+    flex-direction: row;
+    width: max-content;
+    height: 100%;
+    align-items: center; /* Центрирование призов по вертикали */
+}
+
+.prize-box {
+    width: 60px; /* Уменьшена ширина призового бокса */
+    height: 60px; /* Уменьшена высота призового бокса */
+    margin: 0 5px;
+    padding: 5px; /* Уменьшен padding */
+    background-color: #333; /* Цвет контейнера */
+    color: #fff;
+    text-align: center;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box; /* Чтобы padding и border входили в размеры элемента */
+    font-size: 10px; /* Уменьшен размер шрифта */
+    box-shadow: 0 0 15px 5px rgba(255, 255, 255, 0.5); /* Размытая светящаяся обводка */
+}
+
+.prize-box.common {
+    border: 2px solid #ADD8E6; /* Светло-синий цвет */
+    box-shadow: 0 0 15px 5px rgba(173, 216, 230, 0.75); /* Размытая обводка */
+}
+
+.prize-box.uncommon {
+    border: 2px solid #8A2BE2; /* Фиолетовый цвет */
+    box-shadow: 0 0 15px 5px rgba(138, 43, 226, 0.75); /* Размытая обводка */
+}
+
+.prize-box.rare {
+    border: 2px solid #FF4500; /* Красный цвет */
+    box-shadow: 0 0 15px 5px rgba(255, 69, 0, 0.75); /* Размытая обводка */
+}
+
+.prize-box.legendary {
+    border: 2px solid #FFA500; /* Оранжевый цвет */
+    box-shadow: 0 0 15px 5px rgba(255, 165, 0, 0.75); /* Размытая обводка */
+}
+
+.indicator {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 20px solid #fff; /* Изменено на border-top */
+    z-index: 10; /* Убедимся, что стрелка отображается поверх остальных элементов */
+}
+
+.indicator-bottom {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-bottom: 20px solid #fff; /* Изменено на border-bottom */
+    z-index: 10; /* Убедимся, что стрелка отображается поверх остальных элементов */
+}
+
+.open-chest-button {
+    background-color: #4CAF50; /* Зеленый цвет */
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 12px;
+    transition: background-color 0.3s ease;
+}
+
+.open-chest-button:hover {
+    background-color: #45a049; /* Более темный зеленый при наведении */
+}
+
+.open-chest-button.disabled-button {
+    background-color: #cccccc; /* Серый цвет для неактивной кнопки */
+    color: #666666; /* Более темный серый для текста */
+    cursor: not-allowed; /* Курсор в виде запрета */
+}
+
+.chest-animation {
+    position: absolute;
+    width: 80px; /* Увеличенный размер сундука */
+    height: 80px;
+    transition: transform 3s ease-out, opacity 3s ease-out; /* Увеличено время перехода */
+    pointer-events: none;
+    z-index: 1000; /* Убедитесь, что элемент отображается поверх других элементов */
+    opacity: 1;
+}
+
+.chest-animation.fade-out {
+    transform: translateY(-300px); /* Подъем сундука вверх */
+    opacity: 0;
+}
+
+
+
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.2);
+    }
+}
+
+.menu-item.chests {
+    color: #FFD700;
+    animation: pulse 2s infinite;
+}
+
+.menu-item.chests i,
+.menu-item.chests span {
+    color: #FFD700;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.75);
+}
+
+
+
+    </style>
+    
+    
+    <div id="chests-section" class="content-section hidden">
+        <h3>Кейсы</h3>
+        <div id="chests-list">
+            <div class="chest-item" data-price="50000" data-quantity="0">
+                        <img src="/image/common_chest.png" alt="Обычный сундук">
+                        <div class="chest-title"><strong>Обычный сундук</strong></div>
+                        <div class="chest-quantity">У вас 0 сундуков</div><div class="chest-price">Цена: <img src="/image/coin.png" alt="coin" class="coin-image-chest">50000</div></div><div class="chest-item" data-price="500000" data-quantity="0">
+                        <img src="/image/referral_chest.png" alt="Реферальный сундук">
+                        <div class="chest-title"><strong>Реферальный сундук</strong></div>
+                        <div class="chest-quantity">У вас 0 сундуков</div><div class="chest-price">Цена: <img src="/image/coin.png" alt="coin" class="coin-image-chest">500000</div></div><div class="chest-item" data-price="1000000" data-quantity="0">
+                        <img src="/image/super_mega_chest.png" alt="Супер мега сундук">
+                        <div class="chest-title"><strong>Супер мега сундук</strong></div>
+                        <div class="chest-quantity">У вас 0 сундуков</div><div class="chest-price">Цена: <img src="/image/coin.png" alt="coin" class="coin-image-chest">1000000</div></div>        </div>
+    </div>
+    
+    <!-- Модальное окно для сундуков -->
+    <div id="chestModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeChestModal">&times;</span>
+            <h2 id="chestTitle"></h2>
+            <p>Количество: <span id="chestQuantity"></span></p>
+            <p id="chestPriceWrapper">Цена: <img src="/image/coin.png" alt="coin" class="coin-image-chest"><span id="chestPrice"></span></p>
+            <button id="openChestButton" class="open-chest-button">Открыть кейс</button>
+            <div id="prizesContainer" class="prizes-container hidden">
+                <div id="prizesWrapper"></div>
+                <div class="indicator"></div>
+                <div class="indicator-bottom"></div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+
+    <!-- Модальное окно для апгрейдов -->
+    <div id="upgradeModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="upgradeTitle"></h2>
+            <p>Стоимость: <span id="upgradeCost"></span> монет</p>
+            <p id="upgradeDescription"></p>
+            <button id="confirmUpgradeButton" class="modal-button">Купить</button>
+        </div>
+    </div>
+    
+    <!-- Модальное окно для результата боя -->
+    <div id="fightResultModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeFightResult">&times;</span>
+            <h2 id="fightResultTitle"></h2>
+            <p id="fightResultDescription"></p>
+            <button id="fightResultOkButton" class="modal-button">OK</button>
+        </div>
+    </div>
+    
+    <!-- Модальное окно для отображения времени отсутствия -->
+    <div id="absenceModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeAbsenceModal">&times;</span>
+            <h2>Добро пожаловать обратно!</h2>
+            <p>Вы отсутствовали <span id="absence-time">77</span> секунд и заработали: <span id="absence-profit">3</span> <img src="image/coin.png" alt="coin" class="coin-image"></p>
+        </div>
+    </div>
+
+
+    <!-- Модальное окно для покупки улучшений -->
+    <div id="clickUpgradeModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeClickUpgradeModal">&times;</span>
+            <h2 id="clickUpgradeTitle"></h2>
+            <p>Стоимость: <span id="clickUpgradeCost" class="gold-text"></span> <img src="image/coin.png" alt="coin" class="coin-image"></p>
+            <p id="clickUpgradeDescription"></p>
+            <button id="confirmClickUpgradeButton" class="modal-button">Купить</button>
+        </div>
+    </div>
+    
+    <!-- Модальное окно для реферальных улучшений -->
+    <div id="referralUpgradeModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeReferralUpgradeModal">&times;</span>
+            <h2 id="referralUpgradeTitle"></h2>
+            <div id="referral-coins-container">
+                Реферальные монеты:  <span id="referral-coins">0</span>
+                <img src="image/coinref.png" alt="refcoin" class="coin-image">
+            </div>
+            <p>Стоимость: <span id="referralUpgradeCost" class="gold-text"></span><img src="image/coinref.png" alt="refcoin" class="coin-image"></p>
+            <p id="referralUpgradeDescription"></p>
+            <button id="confirmReferralUpgradeButton" class="modal-button">Купить</button>
+        </div>
+    </div>
+    
+    <script>
+document.addEventListener('DOMContentLoaded', () => {
+    if (window.Telegram && window.Telegram.WebApp) {
+        window.Telegram.WebApp.ready();
+        
+        console.log('Текущая платформа:', window.Telegram.WebApp.platform);
+        
+        // Обновленная проверка платформы
+        if (window.Telegram.WebApp.platform === 'web') {
+            document.body.innerHTML = '<div style="text-align: center; padding: 20px;">Это приложение доступно только в мобильной версии Telegram.</div>';
+            document.body.style.pointerEvents = 'none';
+            document.body.style.opacity = '0.5';
+            throw new Error('Приложение доступно только в мобильной версии Telegram');
+        }
+
+
+        let chestInfo = {"common_chest":0,"referral_chest":0,"super_mega_chest":0,"common_chest_price":50000,"referral_chest_price":500000,"super_mega_chest_price":1000000};
+    
+        var chestItems = document.querySelectorAll('.chest-item');
+        var chestModal = document.getElementById('chestModal');
+        var closeChestModal = document.getElementById('closeChestModal');
+        var chestTitle = document.getElementById('chestTitle');
+        var chestQuantity = document.getElementById('chestQuantity');
+        var chestPriceWrapper = document.getElementById('chestPriceWrapper');
+        var chestPrice = document.getElementById('chestPrice');
+        var prizesContainer = document.getElementById('prizesContainer');
+        var prizesWrapper = document.getElementById('prizesWrapper');
+        var openChestButton = document.getElementById('openChestButton');
+        var selectedChestPrice;
+    
+        const chestTypeMap = {
+            'Обычный сундук': 'common_chest',
+            'Реферальный сундук': 'referral_chest',
+            'Супер мега сундук': 'super_mega_chest'
+        };
+    
+        chestItems.forEach(function(item) {
+            item.addEventListener('click', function() {
+                var title = this.querySelector('.chest-title').textContent;
+                var quantity = this.getAttribute('data-quantity');
+                var price = this.getAttribute('data-price');
+    
+                chestTitle.textContent = title;
+                chestQuantity.textContent = quantity + ' сундуков';
+                selectedChestPrice = parseInt(price);
+                if (quantity == 0) {
+                    chestPriceWrapper.style.display = 'block';
+                    chestPrice.textContent = price;
+                } else {
+                    chestPriceWrapper.style.display = 'none';
+                }
+    
+                chestModal.style.display = 'block';
+                openChestButton.disabled = false; // Активировать кнопку при открытии модального окна
+                openChestButton.classList.remove('disabled-button');
+            });
+        });
+    
+        closeChestModal.addEventListener('click', function() {
+            if (!openChestButton.disabled) { // Только если кнопка не заблокирована
+                chestModal.style.display = 'none';
+                prizesContainer.classList.add('hidden');
+                prizesWrapper.innerHTML = '';
+            }
+        });
+    
+        window.addEventListener('click', function(event) {
+            if (event.target == chestModal && !openChestButton.disabled) { // Только если кнопка не заблокирована
+                chestModal.style.display = 'none';
+                prizesContainer.classList.add('hidden');
+                prizesWrapper.innerHTML = '';
+            }
+        });
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    
+        document.getElementById('openChestButton').addEventListener('click', function() {
+            openChestButton.disabled = true; // Деактивировать кнопку
+            openChestButton.classList.add('disabled-button');
+            var chestTitleText = chestTitle.textContent;
+            var chestType = chestTypeMap[chestTitleText];
+            var quantity = chestInfo[chestType]; // Получаем количество сундуков данного типа
+        
+            if (quantity > 0) {
+                // Обновляем количество сундуков в базе данных
+                openChest(chestType, 'decrement');
+                // Уменьшаем количество сундуков на 1
+                chestInfo[chestType]--;
+        
+                // Обновляем количество сундуков в модальном окне
+                chestQuantity.textContent = chestInfo[chestType] + ' сундуков';
+                // Обновляем количество сундуков на вкладке кейсов
+                updateChestQuantity(chestType, chestInfo[chestType]);
+        
+                // Запускаем анимацию открытия кейса
+                startChestOpeningAnimation(selectedChestPrice);
+            } else {
+                var price = chestInfo[chestType + '_price'];
+                if (score >= price) {
+                    // Уменьшаем количество очков на стоимость сундука
+                    score -= price;
+                    // Обновляем количество очков на странице
+                    updateScoreDisplay(score);
+                    // Обновляем количество очков в базе данных
+                    openChest(chestType, 'buy');
+        
+                    // Запускаем анимацию открытия кейса
+                    startChestOpeningAnimation(selectedChestPrice);
+                } else {
+                    alert('Недостаточно очков для покупки кейса');
+                    openChestButton.disabled = false; // Активировать кнопку, если недостаточно очков
+                    openChestButton.classList.remove('disabled-button');
+                }
+            }
+        });
+        
+        function startChestOpeningAnimation(selectedChestPrice) {
+            prizesWrapper.innerHTML = '';
+            for (let i = 0; i < 80; i++) {
+                const isInitial = i < 68 || i >= 71; // Первые 68 сундуков и сундуки с 72 по 80
+                const prizeBoxData = getRandomPrize(selectedChestPrice, isInitial);
+                const prizeBox = document.createElement('div');
+                prizeBox.classList.add('prize-box', prizeBoxData.class);
+                prizeBox.setAttribute('data-type', prizeBoxData.type); // Добавляем атрибут data-type
+                prizeBox.innerHTML = prizeBoxData.content;
+                prizesWrapper.appendChild(prizeBox);
+            }
+            prizesContainer.classList.remove('hidden');
+            startScrollAnimation(prizesWrapper);
+        }
+    
+    
+    
+        
+        function updateChestQuantity(chestType, quantity) {
+            document.querySelectorAll('.chest-item').forEach(item => {
+                var title = item.querySelector('.chest-title').textContent;
+                if (chestTypeMap[title] === chestType) {
+                    item.querySelector('.chest-quantity').textContent = 'У вас ' + quantity + ' сундуков';
+                    item.setAttribute('data-quantity', quantity); // Обновляем атрибут data-quantity
+        
+                    var chestPriceElement = item.querySelector('.chest-price'); // Находим элемент chest-price
+        
+                    if (quantity == 0) {
+                        if (chestPriceElement) { // Проверяем, существует ли элемент chest-price
+                            chestPriceElement.style.display = 'block';
+                            chestPriceElement.textContent = 'Цена: ' + chestInfo[chestType + '_price'] + ' монет';
+                        }
+                        if (chestTitle.textContent === title) {
+                            chestPriceWrapper.style.display = 'block';
+                            chestPrice.textContent = chestInfo[chestType + '_price'];
+                        }
+                    } else {
+                        if (chestPriceElement) { // Проверяем, существует ли элемент chest-price
+                            chestPriceElement.style.display = 'none';
+                        }
+                    }
+                    console.log('СchestType', chestType);
+                }
+            });
+        }
+    
+    
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        function updateScoreDisplay(newScore) {
+            document.getElementById('score-value').textContent = newScore;
+        }
+        
+        function openChest(chestType, updateType, prize = null) {
+            let body = { action: 'open_chest', chest_type: chestType, update_type: updateType };
+            if (prize) {
+                body.prize = prize;
+            }
+            fetch('', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            })
+            .then(response => response.text())
+            .then(text => {
+                try {
+                    const data = JSON.parse(text);
+                    if (data.success) {
+                        console.log('Сундук открыт', data);
+                        if (prize) {
+                            updateUserPrizes(prize);
+                        }
+                    } else {
+                        console.error('Ошибка открытия кейса:', data.error);
+                        alert(data.error || 'Ошибка открытия кейса');
+                    }
+                } catch (e) {
+                    console.error('Ошибка обработки ответа:', e, text);
+                    alert('Ошибка открытия кейса: некорректный ответ от сервера');
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert('Ошибка открытия кейса');
+            });
+        }
+    
+    
+        function updateUserPrizes(prize) {
+            console.log('Обновление призов пользователя:', prize);
+            if (prize.type === 'coins') {
+                score += prize.amount;
+                updateScoreDisplay(score);
+            } else if (prize.type === 'referral_coins') {
+                referral_coins += prize.amount;
+                updateReferralCoinsDisplay(referral_coins);
+            }
+        }
+    
+        
+        function updateReferralCoinsDisplay(newReferralCoins) {
+            document.getElementById('referral-coins').textContent = newReferralCoins;
+            document.getElementById('referral-coins-stat').textContent = newReferralCoins;
+        }
+            
+        
+        function sendPrizeToDatabase(prize) {
+            fetch('', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'receive_prize', prize: prize })
+            })
+            .then(response => response.text())
+            .then(text => {
+                console.log('Server response text:', text); // Логирование ответа сервера
+                try {
+                    const data = JSON.parse(text);
+                    if (data.success) {
+                        console.log('Приз получен', data);
+                    } else {
+                        console.error('Ошибка получения приза:', data.error);
+                        alert(data.error || 'Ошибка получения приза');
+                    }
+                } catch (e) {
+                    console.error('Ошибка обработки ответа:', e, text);
+                    alert('Ошибка получения приза: некорректный ответ от сервера');
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert('Ошибка получения приза');
+            });
+        }
+    
+        
+        
+        
+        
+        
+        
+        function startScrollAnimation(container) {
+            let scrollPos = 0;
+            const totalPrizes = 80;
+            const prizeWidth = 70; // Новая ширина призового бокса (60px + 2*5px margin)
+            const duration = 10000;
+            const targetIndex = 69;
+    
+            const containerWidth = container.parentElement.offsetWidth;
+            const targetScrollPos = (targetIndex * prizeWidth + prizeWidth / 2) - (containerWidth / 2);
+    
+            function easeOutQuad(t) {
+                return t * (2 - t);
+            }
+    
+            function scroll() {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const easedProgress = easeOutQuad(progress);
+    
+                scrollPos = easedProgress * targetScrollPos;
+                container.style.transform = `translateX(-${scrollPos}px)`;
+    
+                if (progress < 1) {
+                    requestAnimationFrame(scroll);
+                } else {
+                    openChestButton.disabled = false; // Активировать кнопку после завершения анимации
+                    openChestButton.classList.remove('disabled-button');
+                    showWinningPrize();
+                }
+            }
+    
+            const startTime = Date.now();
+            requestAnimationFrame(scroll);
+        }
+        
+        function showWinningPrize() {
+            const winningPrizeElement = document.querySelectorAll('.prize-box')[69];
+            const winningPrize = {
+                type: winningPrizeElement.getAttribute('data-type'), // Используем getAttribute для получения значения data-type
+                amount: parseInt(winningPrizeElement.textContent.trim())
+            };
+        
+            alert('Вы выиграли: ' + winningPrizeElement.textContent);
+            sendPrizeToDatabase(winningPrize);
+            updateUserPrizes(winningPrize);
+            var chestTitleText = chestTitle.textContent;
+            var chestType = chestTypeMap[chestTitleText];
+            updateChestQuantity(chestType, chestInfo[chestType]); // Обновление количества сундуков и цены после анимации
+        }
+    
+    
+        function getRandomPrize(price, isInitial) {
+            const rand = Math.random();
+        
+            if (isInitial) {
+                // Шансы для первых 68 сундуков
+                if (price === 50000) {
+                    if (rand < 0.35) {
+                        return {
+                            class: 'common',
+                            content: `<img src="/image/coin.png" alt="coin" class="coin-image"> ${Math.floor(Math.random() * 900) + 100}`,
+                            type: 'coins'
+                        };
+                    } else if (rand < 0.70) {
+                        return {
+                            class: 'uncommon',
+                            content: `<img src="/image/coinref.png" alt="refcoin" class="coin-image"> ${Math.floor(Math.random() * 2) + 1}`,
+                            type: 'referral_coins'
+                        };
+                    } else if (rand < 0.90) {
+                        return {
+                            class: 'rare',
+                            content: `<img src="/image/coin.png" alt="coin" class="coin-image"> ${Math.floor(Math.random() * 900000) + 100000}`,
+                            type: 'coins'
+                        };
+                    } else {
+                        return {
+                            class: 'legendary',
+                            content: `<img src="/image/coinref.png" alt="refcoin" class="coin-image"> ${Math.floor(Math.random() * 5) + 3}`,
+                            type: 'referral_coins'
+                        };
+                    }
+                } else if (price === 500000) {
+                    if (rand < 0.35) {
+                        return {
+                            class: 'common',
+                            content: `<img src="/image/coin.png" alt="coin" class="coin-image"> ${Math.floor(Math.random() * 250000) + 50000}`,
+                            type: 'coins'
+                        };
+                    } else if (rand < 0.70) {
+                        return {
+                            class: 'uncommon',
+                            content: `<img src="/image/coinref.png" alt="refcoin" class="coin-image"> ${Math.floor(Math.random() * 6) + 5}`,
+                            type: 'referral_coins'
+                        };
+                    } else if (rand < 0.90) {
+                        return {
+                            class: 'rare',
+                            content: `<img src="/image/coin.png" alt="coin" class="coin-image"> ${Math.floor(Math.random() * 700000) + 300000}`,
+                            type: 'coins'
+                        };
+                    } else {
+                        return {
+                            class: 'legendary',
+                            content: `<img src="/image/coinref.png" alt="refcoin" class="coin-image"> ${Math.floor(Math.random() * 10) + 11}`,
+                            type: 'referral_coins'
+                        };
+                    }
+                } else if (price === 1000000) {
+                    if (rand < 0.35) {
+                        return {
+                            class: 'common',
+                            content: `<img src="/image/coin.png" alt="coin" class="coin-image"> ${Math.floor(Math.random() * 400000) + 100000}`,
+                            type: 'coins'
+                        };
+                    } else if (rand < 0.70) {
+                        return {
+                            class: 'uncommon',
+                            content: `<img src="/image/coinref.png" alt="refcoin" class="coin-image"> ${Math.floor(Math.random() * 6) + 5}`,
+                            type: 'referral_coins'
+                        };
+                    } else if (rand < 0.90) {
+                        return {
+                            class: 'rare',
+                            content: `<img src="/image/coin.png" alt="coin" class="coin-image"> ${Math.floor(Math.random() * 4500000) + 500000}`,
+                            type: 'coins'
+                        };
+                    } else {
+                        return {
+                            class: 'legendary',
+                            content: `<img src="/image/coinref.png" alt="refcoin" class="coin-image"> ${Math.floor(Math.random() * 10) + 11}`,
+                            type: 'referral_coins'
+                        };
+                    }
+                }
+            } else {
+            // Шансы для последних 12 сундуков
+                    if (price === 50000) {
+                        if (rand < 0.90) {
+                            return {
+                                class: 'common',
+                                content: `<img src="/image/coin.png" alt="coin" class="coin-image"> ${Math.floor(Math.random() * 900) + 100}`,
+                                type: 'coins'
+                            };
+                        } else if (rand < 0.94) {
+                            return {
+                                class: 'uncommon',
+                                content: `<img src="/image/coinref.png" alt="refcoin" class="coin-image"> 1`,
+                                type: 'referral_coins'
+                            };
+                        } else if (rand < 0.99) {
+                            return {
+                                class: 'rare',
+                                content: `<img src="/image/coin.png" alt="coin" class="coin-image"> ${Math.floor(Math.random() * 900000) + 100000}`,
+                                type: 'coins'
+                            };
+                        } else {
+                            return {
+                                class: 'legendary',
+                                content: `<img src="/image/coinref.png" alt="refcoin" class="coin-image"> ${Math.floor(Math.random() * 2) + 2}`,
+                                type: 'referral_coins'
+                            };
+                        }
+                    } else if (price === 500000) {
+                        if (rand < 0.90) {
+                            return {
+                                class: 'common',
+                                content: `<img src="/image/coin.png" alt="coin" class="coin-image"> ${Math.floor(Math.random() * 50000) + 50000}`,
+                                type: 'coins'
+                            };
+                        } else if (rand < 0.94) {
+                            return {
+                                class: 'uncommon',
+                                content: `<img src="/image/coinref.png" alt="refcoin" class="coin-image"> ${Math.floor(Math.random() * 3) + 2}`,
+                                type: 'referral_coins'
+                            };
+                        } else if (rand < 0.99) {
+                            return {
+                                class: 'rare',
+                                content: `<img src="/image/coin.png" alt="coin" class="coin-image"> ${Math.floor(Math.random() * 600000) + 400000}`,
+                                type: 'coins'
+                            };
+                        } else {
+                            return {
+                                class: 'legendary',
+                                content: `<img src="/image/coinref.png" alt="refcoin" class="coin-image"> ${Math.floor(Math.random() * 3) + 5}`,
+                                type: 'referral_coins'
+                            };
+                        }
+                    } else if (price === 1000000) {
+                        if (rand < 0.90) {
+                            return {
+                                class: 'common',
+                                content: `<img src="/image/coin.png" alt="coin" class="coin-image"> ${Math.floor(Math.random() * 100000) + 100000}`,
+                                type: 'coins'
+                            };
+                        } else if (rand < 0.94) {
+                            return {
+                                class: 'uncommon',
+                                content: `<img src="/image/coinref.png" alt="refcoin" class="coin-image"> ${Math.floor(Math.random() * 3) + 5}`,
+                                type: 'referral_coins'
+                            };
+                        } else if (rand < 0.99) {
+                            return {
+                                class: 'rare',
+                                content: `<img src="/image/coin.png" alt="coin" class="coin-image"> ${Math.floor(Math.random() * 4000000) + 500000}`,
+                                type: 'coins'
+                            };
+                        } else {
+                            return {
+                                class: 'legendary',
+                                content: `<img src="/image/coinref.png" alt="refcoin" class="coin-image"> ${Math.floor(Math.random() * 3) + 8}`,
+                                type: 'referral_coins'
+                            };
+                        }
+                    }
+                }
+            }
+    
+        function updateChestMenuItem(chestInfo) {
+            const menuItem = document.querySelector('.menu-item[data-page="chests-section"]');
+            const totalChests = chestInfo.common_chest + chestInfo.referral_chest + chestInfo.super_mega_chest;
+            if (totalChests > 0) {
+                menuItem.classList.add('chests');
+            } else {
+                menuItem.classList.remove('chests');
+            }
+        }
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+        const sections = document.querySelectorAll('.content-section');
+        const menuItems = document.querySelectorAll('.menu-item');
+        const subMenuItems = document.querySelectorAll('.sub-menu-item');
+        const subContents = document.querySelectorAll('.sub-content');
+        const fighterImage = document.getElementById('fighter-image');
+        const scoreValue = document.getElementById('score-value');
+        const coinsPerSecondValue = document.getElementById('coins-per-second');
+        const upgradeScoreValue = document.getElementById('upgrade-score-value');
+        const coinsPerClickValue = document.getElementById('coins-per-click');
+        const upgradeCoinsPerSecondValue = document.getElementById('upgrade-coins-per-second');
+        const resetButton = document.getElementById('reset-button');
+        const modal = document.getElementById("upgradeModal");
+        const closeModal = document.getElementsByClassName("close")[0];
+        const confirmUpgradeButton = document.getElementById('confirmUpgradeButton');
+        const startFightButton = document.getElementById('start-fight-button');
+        const loadingOpponent = document.getElementById('loading-opponent');
+        const opponentFound = document.getElementById('opponent-found');
+        const opponentIdElement = document.getElementById('opponent-id');
+        const fightArea = document.getElementById('fight-area');
+        const playerScoreElement = document.getElementById('player-score');
+        const botScoreElement = document.getElementById('bot-score');
+        const fightTimerElement = document.getElementById('fight-timer');
+        const clickImage = document.getElementById('click-image');
+        const fightResult = document.getElementById('fight-result');
+        const fightResultModal = document.getElementById('fightResultModal');
+        const fightResultTitle = document.getElementById('fightResultTitle');
+        const fightResultDescription = document.getElementById('fightResultDescription');
+        const closeFightResult = document.getElementById('closeFightResult');
+        const fightResultOkButton = document.getElementById('fightResultOkButton');
+        let selectedUpgradeId = null;
+        let playerScore = 0;
+        let botScore = 0;
+        let fightDuration = 60000; // 1 минута
+        let botInterval, timerInterval;
+        let score = 2241;
+        let coinsPerSecond = 103;
+        let coinsPerClick = 0;
+        let upgrades = {"1":{"access_level":1,"level":1,"coins":3300,"reward":1,"upgradereward":0},"2":{"access_level":1,"level":1,"coins":6300,"reward":2,"upgradereward":0},"3":{"access_level":3,"level":1,"coins":57900,"reward":5,"upgradereward":0},"4":{"access_level":1,"level":2,"coins":235,"reward":34,"upgradereward":38},"5":{"access_level":1,"level":2,"coins":400,"reward":58,"upgradereward":65},"6":{"access_level":1,"level":1,"coins":575,"reward":115,"upgradereward":0},"7":{"access_level":1,"level":1,"coins":805,"reward":161,"upgradereward":0},"8":{"access_level":2,"level":1,"coins":1150,"reward":230,"upgradereward":0},"9":{"access_level":2,"level":1,"coins":1495,"reward":299,"upgradereward":0},"10":{"access_level":3,"level":1,"coins":1840,"reward":368,"upgradereward":0},"11":{"access_level":4,"level":1,"coins":2185,"reward":437,"upgradereward":0},"12":{"access_level":5,"level":1,"coins":2530,"reward":506,"upgradereward":0},"13":{"access_level":6,"level":1,"coins":2875,"reward":575,"upgradereward":0},"14":{"access_level":1,"level":1,"coins":17094,"reward":518,"upgradereward":0},"15":{"access_level":1,"level":1,"coins":28446,"reward":1320,"upgradereward":0},"16":{"access_level":1,"level":1,"coins":56925,"reward":1725,"upgradereward":0},"17":{"access_level":1,"level":1,"coins":72450,"reward":2415,"upgradereward":0},"18":{"access_level":2,"level":1,"coins":103500,"reward":3450,"upgradereward":0},"19":{"access_level":3,"level":1,"coins":134550,"reward":4485,"upgradereward":0},"20":{"access_level":4,"level":1,"coins":165600,"reward":5520,"upgradereward":0},"21":{"access_level":5,"level":1,"coins":196650,"reward":6555,"upgradereward":0},"22":{"access_level":6,"level":1,"coins":227700,"reward":7590,"upgradereward":0},"23":{"access_level":7,"level":1,"coins":258750,"reward":8625,"upgradereward":0},"24":{"access_level":1,"level":1,"coins":170,"reward":34,"upgradereward":0},"25":{"access_level":1,"level":1,"coins":290,"reward":58,"upgradereward":0},"26":{"access_level":1,"level":1,"coins":575,"reward":115,"upgradereward":0},"27":{"access_level":1,"level":1,"coins":805,"reward":161,"upgradereward":0},"28":{"access_level":1,"level":1,"coins":1150,"reward":230,"upgradereward":0},"29":{"access_level":1,"level":1,"coins":1495,"reward":299,"upgradereward":0},"30":{"access_level":1,"level":1,"coins":1840,"reward":368,"upgradereward":0},"31":{"access_level":1,"level":1,"coins":2185,"reward":437,"upgradereward":0},"32":{"access_level":1,"level":1,"coins":2530,"reward":506,"upgradereward":0},"33":{"access_level":1,"level":1,"coins":2875,"reward":575,"upgradereward":0}};
+        let clickHandler;
+        let dailyFightLimit = 0;
+        let dailyFightCount = 0;
+        let remainingFights = dailyFightLimit - dailyFightCount;
+        let referral_upgrades = [{"level":1,"price":2,"reward":1},{"level":1,"price":5,"reward":1},{"level":1,"price":10,"reward":1}];
+        let referral_coins = 0;
+        console.log('dailyFightLimit:', dailyFightLimit);
+        console.log('dailyFightCount:', dailyFightCount);
+        console.log('remainingFights:', remainingFights);
+        // функционал улучшений новый
+        const clickUpgradeModal = document.getElementById("clickUpgradeModal");
+        const closeClickUpgradeModal = document.getElementById("closeClickUpgradeModal");
+        const confirmClickUpgradeButton = document.getElementById('confirmClickUpgradeButton');
+        const hapticFeedback = Telegram.WebApp.HapticFeedback;
+        
+        window.onload = function() {
+                Telegram.WebApp.setHeaderColor("#000000");  // Устанавливает черный цвет заголовка
+                Telegram.WebApp.expand();
+                
+                hapticFeedback.impactOccurred('light'); 
+            };
+            
+            
+        document.addEventListener('touchstart', function(event) {
+            if (event.touches.length > 1) {
+                event.preventDefault();
+            }
+        }, { passive: false });
+        
+        document.addEventListener('touchmove', function(event) {
+            if (event.touches.length > 1) {
+                event.preventDefault();
+            }
+        }, { passive: false });
+        
+        
+        const userLevel = 1;
+    
+        const lockUpgradeBox = (upgradeBox, upgrade) => {
+            if (upgrade.access_level > userLevel) {
+                upgradeBox.classList.add('locked');
+                upgradeBox.querySelector('.upgrade-title').textContent += ` (Требуется уровень ${upgrade.access_level})`;
+            }
+        };
+        
+        
+        document.querySelectorAll('.upgrade-box-click').forEach(upgradeBox => {
+            const upgradeId = upgradeBox.getAttribute('data-id');
+            const upgrade = upgrades[upgradeId];
+    
+            if (upgrade) {
+                lockUpgradeBox(upgradeBox, upgrade);
+    
+                upgradeBox.addEventListener('click', () => {
+                    if (!upgradeBox.classList.contains('locked')) {
+                        selectedUpgradeId = upgradeId;
+                        
+                        document.getElementById('clickUpgradeTitle').textContent = upgradeBox.querySelector('.upgrade-title').textContent;
+                        document.getElementById('clickUpgradeCost').textContent = upgrade.coins;
+                        // Расчет следующей награды
+                        const baseReward = upgrade.reward || 0;
+                        const nextReward = Math.floor(baseReward * upgrade.level / 7.6 + baseReward);
+                        // Присваивание значений для модального окна покупки улучшений
+                        document.getElementById('clickUpgradeDescription').innerHTML = `
+                            Уровень улучшения: <span class="gold-text">${upgrade.level}</span><br>
+                            <span class="new-line">Вы получите: +<span class="gold-text">${nextReward}</span> к клику</span>`;
+                        clickUpgradeModal.style.display = "block";
+                    }
+                });
+            } else {
+                console.error(`Upgrade with ID ${upgradeId} not found.`);
+            }
+        });
+    
+        document.querySelectorAll('.upgrade-box').forEach(upgradeBox => {
+            const upgradeId = upgradeBox.getAttribute('data-id');
+            const upgrade = upgrades[upgradeId];
+    
+            if (upgrade) {
+                lockUpgradeBox(upgradeBox, upgrade);
+    
+                upgradeBox.addEventListener('click', () => {
+                    if (!upgradeBox.classList.contains('locked')) {
+                        selectedUpgradeId = upgradeId;
+                        document.getElementById('clickUpgradeTitle').textContent = upgradeBox.querySelector('.upgrade-title').textContent;
+                        document.getElementById('clickUpgradeCost').textContent = upgrade.coins;
+                        // Расчет следующей награды
+                        const baseReward = upgrade.reward || 0;
+                        const nextReward = Math.floor(baseReward * upgrade.level / 7.6 + baseReward);
+                        // Присваивание значений для модального окна покупки улучшений
+                        document.getElementById('clickUpgradeDescription').innerHTML = `
+                            Уровень улучшения: <span class="gold-text">${upgrade.level}</span><br>
+                            <span class="new-line">Вы получите: <span class="gold-text">${nextReward}</span> <img src="image/coin.png" alt="coin" class="coin-image"> в час</span>`;
+                        clickUpgradeModal.style.display = "block";
+                    }
+                });
+            } else {
+                console.error(`Upgrade with ID ${upgradeId} not found.`);
+            }
+        });
+    
+        confirmClickUpgradeButton.addEventListener('click', () => {
+            if (selectedUpgradeId && score >= upgrades[selectedUpgradeId].coins) {
+                score -= upgrades[selectedUpgradeId].coins;
+                fetch('', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({id: parseInt(selectedUpgradeId)})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.level !== undefined) {
+                        upgrades[selectedUpgradeId].level = data.level;
+                        upgrades[selectedUpgradeId].coins = Math.floor(data.coins);
+                        upgrades[selectedUpgradeId].upgradereward += data.next_reward; // Обновляем upgradereward
+                        
+                        
+                        
+                        // Обновление стоимости улучшения за клик на клиенте
+                        const upgradeBoxClickCostSpan = document.querySelector(`.upgrade-box-click[data-id="${selectedUpgradeId}"] .upgrade-cost span`);
+                        if (upgradeBoxClickCostSpan) {
+                            upgradeBoxClickCostSpan.textContent = upgrades[selectedUpgradeId].coins;
+                        } else {
+                            const upgradeBoxClickCostDiv = document.querySelector(`.upgrade-box-click[data-id="${selectedUpgradeId}"] .upgrade-cost`);
+                            if (upgradeBoxClickCostDiv) {
+                                upgradeBoxClickCostDiv.innerHTML = `<img src="/image/coin.png" alt="Coin"> <span>${upgrades[selectedUpgradeId].coins}</span>`;
+                            }
+                        }
+                        
+                        // Обновление стоимости улучшения на клиенте
+                        const upgradeBoxCostSpan = document.querySelector(`.upgrade-box[data-id="${selectedUpgradeId}"] .upgrade-cost span`);
+                        if (upgradeBoxCostSpan) {
+                            upgradeBoxCostSpan.textContent = upgrades[selectedUpgradeId].coins;
+                        } else {
+                            const upgradeBoxCostDiv = document.querySelector(`.upgrade-box[data-id="${selectedUpgradeId}"] .upgrade-cost`);
+                            if (upgradeBoxCostDiv) {
+                                upgradeBoxCostDiv.innerHTML = `<img src="/image/coin.png" alt="Coin"> <span>${upgrades[selectedUpgradeId].coins}</span>`;
+                            }
+                        }
+        
+                        // Обновление прибыли за тап и прибыли в секунду
+                        coinsPerClick = calculateCoinsPerClick(upgrades);
+                        coinsPerSecond = calculateCoinsPerSecond(upgrades);
+        
+                        // Обновление интерфейса
+                        updateScore();
+                        updateCoinsPerClick();
+                        updateCoinsPerSecond();
+        
+                        // Обновление награды в модальном окне
+                        const baseReward = upgrades[selectedUpgradeId].reward || 0;
+                        const nextReward = Math.floor(baseReward * upgrades[selectedUpgradeId].level / 7.6 + baseReward);
+                        document.getElementById('clickUpgradeDescription').textContent = `Level: ${upgrades[selectedUpgradeId].level}, Reward: ${baseReward}, Next Reward: ${nextReward}`;
+        
+                        // Скрытие модального окна
+                        clickUpgradeModal.style.display = "none";
+                    } else {
+                        console.error('Error saving upgrade:', data.error);
+                        alert('Произошла ошибка при покупке улучшения. Пожалуйста, попробуйте снова.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error saving upgrade:', error);
+                    alert('Произошла ошибка при покупке улучшения. Пожалуйста, попробуйте снова.');
+                });
+            } else {
+                alert('Недостаточно монет для покупки улучшения');
+            }
+        });
+    
+    
+        //РЕФЕРАЛЬНЫЕ УЛУЧШЕНИЯ
+        document.querySelectorAll('.ref-upgrade-box').forEach(refUpgradeBox => {
+            const upgradeId = refUpgradeBox.getAttribute('data-id');
+            const upgrade = referral_upgrades[upgradeId - 1];
+        
+            if (upgrade) {
+                refUpgradeBox.addEventListener('click', () => {
+                    selectedReferralUpgradeId = upgradeId;
+        
+                    const referralUpgradeTitleElem = document.getElementById('referralUpgradeTitle');
+                    const referralUpgradeCostElem = document.getElementById('referralUpgradeCost');
+                    const upgradeTitleElem = refUpgradeBox.querySelector('.upgrade-title');
+                    const upgradeCostElem = refUpgradeBox.querySelector('.upgrade-cost span');
+        
+                    if (referralUpgradeTitleElem && referralUpgradeCostElem && upgradeTitleElem && upgradeCostElem) {
+                        referralUpgradeTitleElem.textContent = upgradeTitleElem.textContent;
+                        referralUpgradeCostElem.textContent = upgradeCostElem.textContent;
+        
+                        // Расчет следующей награды в зависимости от идентификатора улучшения
+                        let nextReward;
+                        if (upgradeId == 1) {
+                            nextReward = 0.1;
+                        } else if (upgradeId == 2) {
+                            nextReward = 0.5;
+                        } else if (upgradeId == 3) {
+                            nextReward = 1.0;
+                        }
+                        document.getElementById('referralUpgradeDescription').innerHTML = `
+                            Уровень улучшения: <span class="gold-text">${upgrade.level}</span><br>
+                            <span class="new-line">Ваш множитель увеличится на: <span class="gold-text">${nextReward}`;
+    
+        
+                        referralUpgradeModal.style.display = "block";
+                    } else {
+                        console.error("One or more elements were not found:", {
+                            referralUpgradeTitleElem,
+                            referralUpgradeCostElem,
+                            upgradeTitleElem,
+                            upgradeCostElem
+                        });
+                    }
+                });
+            } else {
+                console.error(`Referral upgrade with ID ${upgradeId} not found.`);
+            }
+        });
+        
+        // Функция для обновления реферального улучшения
+        confirmReferralUpgradeButton.addEventListener('click', () => {
+            const referralCoinsElement = document.getElementById('referral-coins');
+            const referralCoinsElementStat = document.getElementById('referral-coins-stat');
+            const referralCoins = parseInt(referralCoinsElement.textContent);
+        
+            if (selectedReferralUpgradeId) {
+                const upgrade = referral_upgrades[selectedReferralUpgradeId - 1];
+                const upgradeCost = upgrade.price;
+        
+                if (referralCoins >= upgradeCost) {
+                    // Отправить запрос на сервер для выполнения улучшения
+                    fetch('', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ referral_upgrade_id: parseInt(selectedReferralUpgradeId) })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Обновить данные улучшений
+                            const refUpgradeBox = document.querySelector(`.ref-upgrade-box[data-id="${selectedReferralUpgradeId}"]`);
+                            upgrade.level = data.new_level;
+                            upgrade.price = data.new_price;
+                            upgrade.reward = data.new_reward;
+        
+                            if (refUpgradeBox) {
+                                refUpgradeBox.setAttribute('data-level', upgrade.level);
+                                refUpgradeBox.querySelector('.upgrade-cost span').textContent = upgrade.price;
+                            }
+        
+                            // Обновить количество реферальных монет на клиенте
+                            referralCoinsElement.textContent = referralCoins - upgradeCost;
+                            referralCoinsElementStat.textContent = referralCoins - upgradeCost;
+                            // Обновить множитель
+                            updateMultiplier();
+                            // Обновить прибыль в час
+                            updateCoinsPerSecond();
+                            console.error('multiplier:', multiplier);
+                            referralUpgradeModal.style.display = "none";
+                        } else {
+                            alert('Ошибка при покупке улучшения. Пожалуйста, попробуйте снова.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Ошибка при покупке улучшения:', error);
+                        alert('Ошибка при покупке улучшения. Пожалуйста, попробуйте снова.');
+                    });
+                } else {
+                    alert('Недостаточно реферальных монет для покупки улучшения');
+                }
+            }
+        });
+        
+        let multiplier = "1.0";
+        
+        const updateMultiplier = () => {
+            let calculatedMultiplier = 0;
+            referral_upgrades.forEach(upgrade => {
+                calculatedMultiplier += upgrade.reward;
+            });
+            calculatedMultiplier -= 2.0;
+            document.getElementById('multiplier-value').textContent = calculatedMultiplier.toFixed(1);
+            document.getElementById('user-multiplier').textContent = calculatedMultiplier.toFixed(1); // Обновление на главной странице
+            multiplier = calculatedMultiplier; // Обновляем значение переменной multiplier
+            console.error('Updated multiplier:', multiplier); // Логируем новое значение множителя
+        };
+        
+        closeReferralUpgradeModal.onclick = function() {
+            referralUpgradeModal.style.display = "none";
+        }
+        
+        window.onclick = function(event) {
+            if (event.target == referralUpgradeModal) {
+                referralUpgradeModal.style.display = "none";
+            }
+        }
+    
+    
+        const calculateCoinsPerClick = (upgrades) => {
+            let coinsPerClick = 1; // Начальное значение для кликов
+            for (let i = 1; i <= 3; i++) {
+                if (upgrades[i] && upgrades[i].upgradereward) {
+                    coinsPerClick += upgrades[i].upgradereward;
+                }
+            }
+            return coinsPerClick;
+        };
+        
+        const calculateCoinsPerSecond = (upgrades, multiplier) => {
+            let coinsPerSecond = 0;
+            for (let i = 4; i <= 33; i++) {
+                if (upgrades[i] && upgrades[i].upgradereward) {
+                    coinsPerSecond += upgrades[i].upgradereward;
+                }
+            }
+            return coinsPerSecond * multiplier;
+        };
+        
+        closeClickUpgradeModal.onclick = function() {
+            clickUpgradeModal.style.display = "none";
+        }
+    
+        window.onclick = function(event) {
+            if (event.target == clickUpgradeModal) {
+                clickUpgradeModal.style.display = "none";
+            }
+        }
+        
+        const updateCoinsPerClick = () => {
+            const coinsPerClickElements = document.querySelectorAll('#coins-per-click');
+            coinsPerClickElements.forEach(element => {
+                element.textContent = coinsPerClick;
+            });
+        };
+        
+        const updateCoinsPerSecond = () => {
+            coinsPerSecond = Math.floor(calculateCoinsPerSecond(upgrades, multiplier));
+            const coinsPerSecondElements = document.querySelectorAll('#coins-per-second, #upgrade-coins-per-second');
+            coinsPerSecondElements.forEach(element => {
+                element.textContent = coinsPerSecond;
+            });
+        };
+        
+        menuItems.forEach(menuItem => {
+            menuItem.addEventListener('click', () => {
+                sections.forEach(section => {
+                    section.classList.remove('active');
+                    section.classList.add('hidden');
+                });
+                menuItems.forEach(item => item.classList.remove('active'));
+                menuItem.classList.add('active');
+                const targetSection = document.getElementById(menuItem.getAttribute('data-page'));
+                if (targetSection) {
+                    targetSection.classList.add('active');
+                    targetSection.classList.remove('hidden');
+                }
+            });
+        });
+    
+        subMenuItems.forEach(subMenuItem => {
+            subMenuItem.addEventListener('click', () => {
+                subContents.forEach(subContent => {
+                    subContent.classList.remove('active');
+                    subContent.classList.add('hidden');
+                });
+                subMenuItems.forEach(item => item.classList.remove('active'));
+    
+                subMenuItem.classList.add('active');
+                const targetSubPage = document.getElementById(subMenuItem.getAttribute('data-sub-page'));
+                if (targetSubPage) {
+                    targetSubPage.classList.add('active');
+                    targetSubPage.classList.remove('hidden');
+                }
+            });
+        });
+            
+        // Обновление количества монет
+        const updateScore = (animate = false) => {
+            coinsPerClick = calculateCoinsPerClick(upgrades);
+            coinsPerSecond = calculateCoinsPerSecond(upgrades, multiplier);
+        
+            if (animate) {
+                animateValue(document.getElementById('score-value'), score - coinsPerClick, score, 1000);
+            } else {
+                document.querySelectorAll('#score-value').forEach(element => {
+                    element.textContent = number_format(score, 0, '.', ' ');
+                });
+                document.querySelectorAll('#upgrade-score-value').forEach(element => {
+                    element.textContent = number_format(score, 0, '.', ' ');
+                });
+            }
+            updateCoinsPerClick();
+            updateCoinsPerSecond();
+            updateLevel();
+            saveScore();
+        };
+    
+            
+        const animateValue = (obj, start, end, duration) => {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                obj.textContent = number_format(Math.floor(progress * (end - start) + start), 0, '.', ' ');
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
+        };
+        
+        const number_format = (number, decimals, decPoint, thousandsSep) => {
+            decimals = Math.abs(decimals) || 0;
+            number = parseFloat(number);
+        
+            if (!decPoint || !thousandsSep) {
+                decPoint = '.';
+                thousandsSep = ',';
+            }
+        
+            const roundedNumber = number.toFixed(decimals);
+            const parts = roundedNumber.split('.');
+            const integerPart = parts[0];
+            const decimalPart = parts.length > 1 ? decPoint + parts[1] : '';
+        
+            const integerPartWithThousands = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, thousandsSep);
+        
+            return integerPartWithThousands + decimalPart;
+        };
+        
+        const updateLogoutTime = () => {
+                    const lastLogoutTime = '2024-08-31 16:17:19';
+                    const secondsSinceLastLogout = '76';
+                    if (lastLogoutTime && secondsSinceLastLogout) {
+                        document.getElementById('last-logout-time').textContent = lastLogoutTime;
+                        document.getElementById('seconds-since-last-logout').textContent = secondsSinceLastLogout;
+                    }
+                };
+        
+        // ТЕСТОВАЯ ПЕРЕМЕННАЯ
+        let accumulatedCoins = 0; // Переменная для накопления монет
+        
+        const incrementScore = () => {
+            // Добавляем coinsPerSecond к накопленным монетам
+            accumulatedCoins += coinsPerSecond;
+        
+            // Проверяем, достаточно ли накопленных монет для начисления
+            while (accumulatedCoins >= 3600) {
+                // Начисляем монету
+                score += Math.floor(accumulatedCoins / 3600);
+                
+                // Уменьшаем накопленное значение на количество начисленных монет
+                accumulatedCoins -= Math.floor(accumulatedCoins / 3600) * 3600;
+            }
+        
+            updateScore(false); // Обновляем без анимации
+        };
+    
+        const saveScore = () => {
+            const currentLevel = parseInt(document.getElementById('user-level').textContent);
+            fetch('', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({score: parseInt(score), coins_per_second: parseInt(coinsPerSecond), coins_per_click: parseInt(coinsPerClick), level: currentLevel})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Score saved successfully');
+                } else {
+                    console.error('Error saving score:', data.error);
+                }
+            })
+            .catch(error => console.error('Error saving score:', error));
+        };
+    
+        fighterImage.addEventListener('click', (event) => {
+            let clickValue = 1 + (upgrades[1].upgradereward || 0) + (upgrades[2].upgradereward || 0) + (upgrades[3]['upgradereward'] ?? 0);
+            score += clickValue;
+            coinsPerClick = clickValue;
+            showClickValue(event.clientX, event.clientY, clickValue);
+            updateScore(true); // Обновляем с анимацией
+        });
+    
+        const showClickValue = (x, y, value) => {
+            const clickValueElement = document.createElement('div');
+            clickValueElement.className = 'click-value';
+            clickValueElement.textContent = `+${value}`;
+            clickValueElement.style.left = `${x - 20}px`;
+            clickValueElement.style.top = `${y - 40}px`;
+            document.getElementById('game-section').appendChild(clickValueElement);
+    
+            setTimeout(() => {
+                clickValueElement.remove();
+            }, 1000);
+        }
+    
+        const showCoinAnimation = () => {
+            const coinAnimation = document.createElement('div');
+            coinAnimation.className = 'coin-animation';
+            coinAnimation.textContent = `+${coinsPerSecond}`;
+            document.querySelector('.stat-item').appendChild(coinAnimation);
+    
+            setTimeout(() => {
+                coinAnimation.remove();
+            }, 1000);
+        };
+    
+        document.querySelectorAll('.upgrade-button').forEach(button => {
+            button.addEventListener('click', () => {
+                selectedUpgradeId = button.getAttribute('data-id');
+                const upgrade = upgrades[selectedUpgradeId];
+                document.getElementById('upgradeTitle').textContent = button.textContent.split(' (')[0];
+                document.getElementById('upgradeCost').textContent = upgrade.coins;
+                document.getElementById('upgradeDescription').textContent = `Level: ${upgrade.level}`;
+                modal.style.display = "block";
+            });
+        });
+    
+        confirmUpgradeButton.addEventListener('click', () => {
+            if (selectedUpgradeId && score >= upgrades[selectedUpgradeId].coins) {
+                score -= upgrades[selectedUpgradeId].coins;
+                fetch('', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({id: parseInt(selectedUpgradeId)})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.level !== undefined) {
+                        upgrades[selectedUpgradeId].level = data.level;
+                        upgrades[selectedUpgradeId].coins = Math.ceil(data.coins);
+                        coinsPerSecond = 0;
+                        for (let i = 4; i <= 33; i++) {
+                            if (upgrades[i].level) {
+                                coinsPerSecond += upgrades[i].level;
+                            }
+                        }
+                        document.querySelector(`button[data-id="${selectedUpgradeId}"]`).textContent = document.querySelector(`button[data-id="${selectedUpgradeId}"]`).textContent.split(' (')[0] + ` (${upgrades[selectedUpgradeId].coins} монет)`;
+                        updateScore();
+                    } else {
+                        console.error('Error saving upgrade:', data.error);
+                    }
+                    modal.style.display = "none";
+                })
+                .catch(error => console.error('Error saving upgrade:', error));
+            } else {
+                alert('Недостаточно монет для покупки улучшения');
+            }
+        });
+    
+        closeModal.onclick = function() {
+            modal.style.display = "none";
+        }
+    
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    
+        resetButton.addEventListener('click', () => {
+            if (confirm('Вы уверены, что хотите сбросить весь прогресс?')) {
+                fetch('', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({reset: true})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        score = 0;
+                        coinsPerSecond = 0;
+                        coinsPerClick = 0;
+                        upgrades = {"1":{"access_level":1,"level":0,"coins":0},"2":{"access_level":1,"level":0,"coins":0},"3":{"access_level":1,"level":0,"coins":0},"4":{"access_level":1,"level":0,"coins":0},"5":{"access_level":1,"level":0,"coins":0},"6":{"access_level":1,"level":0,"coins":0},"7":{"access_level":1,"level":0,"coins":0},"8":{"access_level":1,"level":0,"coins":0},"9":{"access_level":1,"level":0,"coins":0},"10":{"access_level":1,"level":0,"coins":0},"11":{"access_level":1,"level":0,"coins":0},"12":{"access_level":1,"level":0,"coins":0},"13":{"access_level":1,"level":0,"coins":0},"14":{"access_level":1,"level":0,"coins":0},"15":{"access_level":1,"level":0,"coins":0},"16":{"access_level":1,"level":0,"coins":0},"17":{"access_level":1,"level":0,"coins":0},"18":{"access_level":1,"level":0,"coins":0},"19":{"access_level":1,"level":0,"coins":0},"20":{"access_level":1,"level":0,"coins":0},"21":{"access_level":1,"level":0,"coins":0},"22":{"access_level":1,"level":0,"coins":0},"23":{"access_level":1,"level":0,"coins":0},"24":{"access_level":1,"level":0,"coins":0},"25":{"access_level":1,"level":0,"coins":0},"26":{"access_level":1,"level":0,"coins":0},"27":{"access_level":1,"level":0,"coins":0},"28":{"access_level":1,"level":0,"coins":0},"29":{"access_level":1,"level":0,"coins":0},"30":{"access_level":1,"level":0,"coins":0},"31":{"access_level":1,"level":0,"coins":0},"32":{"access_level":1,"level":0,"coins":0},"33":{"access_level":1,"level":0,"coins":0}};
+                        document.querySelectorAll('.upgrade-button').forEach(button => {
+                            const upgradeId = button.getAttribute('data-id');
+                            button.textContent = button.textContent.split(' (')[0] + ` (${upgrades[upgradeId].coins} монет)`;
+                        });
+                        updateScore();
+                        alert('Прогресс успешно сброшен!');
+                    } else {
+                        console.error('Error resetting game:', data.error);
+                    }
+                })
+                .catch(error => console.error('Error resetting game:', error));
+            }
+        });
+    
+        const tasksList = document.getElementById('tasks-list');
+    
+        tasksList.addEventListener('click', (event) => {
+            if (event.target.classList.contains('task-visit-button')) {
+                const button = event.target;
+                const url = button.getAttribute('data-url');
+                window.open(url, '_blank');
+            }
+    
+            if (event.target.classList.contains('task-check-button')) {
+                const button = event.target;
+                const taskId = button.getAttribute('data-task-id');
+    
+                if (button.getAttribute('data-status') === 'pending') {
+                    let secondsRemaining = 30;
+                    button.textContent = `Проверяем... (${secondsRemaining})`;
+                    button.disabled = true;
+                    const interval = setInterval(() => {
+                        secondsRemaining--;
+                        button.textContent = `Проверяем... (${secondsRemaining})`;
+                        if (secondsRemaining <= 0) {
+                            clearInterval(interval);
+                            fetch('', {
+                                method: 'POST',
+                                headers: {'Content-Type': 'application/json'},
+                                body: JSON.stringify({ task_id: taskId, user_id: 9104 })
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    button.textContent = 'Проверено';
+                                    button.setAttribute('data-status', 'completed');
+                                    alert(`Задание выполнено! Вы получили ${data.reward} монет.`);
+                                    // Обновить счёт пользователя
+                                    score += data.reward;
+                                    updateScore();
+                                } else {
+                                    button.textContent = 'Проверить';
+                                    button.disabled = false;
+                                    alert('Ошибка при обновлении статуса задания.');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error updating task status:', error);
+                                button.textContent = 'Проверить';
+                                button.disabled = false;
+                                alert('Ошибка при обновлении статуса задания.');
+                            });
+                        }
+                    }, 1000);
+                }
+            }
+        });
+        
+        const absenceModal = document.getElementById('absenceModal');
+        const closeAbsenceModal = document.getElementById('closeAbsenceModal');
+        const absenceTimeElement = document.getElementById('absence-time');
+        
+        let absenceProfit = 3;
+        let secondsSinceLastLogout = 77;
+        
+        // Показать модальное окно при загрузке страницы, если время отсутствия больше нуля
+        if (secondsSinceLastLogout > 0) {
+            absenceTimeElement.textContent = secondsSinceLastLogout;
+            absenceModal.style.display = 'block';
+        }
+        
+        // Закрыть модальное окно при нажатии на крестик
+        closeAbsenceModal.onclick = function() {
+            updateScore();
+            absenceModal.style.display = 'none';
+        }
+        
+        const levelElement = document.getElementById('user-level');
+        const progressBar = document.getElementById('level-progress-bar');
+        
+        const levels = [100000, 500000, 1000000, 5000000, 10000000, 20000000, 50000000, 100000000, 1000000000];
+    
+        const updateLevel = () => {
+            const currentLevelElement = document.getElementById('user-level');
+            const currentLevel = parseInt(currentLevelElement.textContent);
+            const newLevel = getLevel(score, currentLevel);
+    
+            if (newLevel > currentLevel) {
+                currentLevelElement.textContent = newLevel;
+                document.querySelectorAll('#user-level').forEach(element => {
+                    element.textContent = newLevel;
+                });
+            }
+    
+            const nextLevelScore = levels[newLevel - 1] || 1000000000;
+            const levelRange = nextLevelScore;
+            const progress = (score / levelRange) * 100;
+    
+            progressBar.style.width = `${progress}%`;
+        };
+    
+        const getLevel = (score, currentLevel) => {
+            for (let i = currentLevel - 1; i < levels.length; i++) {
+                if (score < levels[i]) return i + 1;
+            }
+            return levels.length + 1;
+        };
+        
+        setInterval(incrementScore, 1000);
+    
+        updateScore();
+        
+        updateMultiplier();
+        // Fight functionality
+        // Здесь всё для файта
+        let nextFightTime = null;
+        const remainingFightsElement = document.getElementById('remaining-fights');
+        remainingFightsElement.textContent = remainingFights;
+        
+        const cooldownSeconds = 10 * 60; // 10 минут
+        
+        startFightButton.addEventListener('click', () => {
+            const betAmount = parseInt(document.getElementById('bet-amount').value);
+            if (isNaN(betAmount) || betAmount <= 0) {
+                alert('Введите корректную ставку');
+                return;
+            }
+        
+            // Проверяем, достаточно ли монет для ставки
+            fetch('', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ bet_amount: betAmount })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    score = data.new_score; // Обновляем локальную переменную счета
+                    updateScore();
+                    document.getElementById('bet-amount').classList.add('hidden');
+                    startFightButton.classList.add('hidden');
+                    document.querySelectorAll('#fights-section > .stats-box, #fights-section > .remaining-fights, #fights-section > .stat-item, #fights-section > .rules-box').forEach(function(element) {
+                        element.classList.add('hidden');
+                    });
+        
+                    const betAmountDisplay = document.createElement('div');
+                    betAmountDisplay.className = 'bet-display';
+                    betAmountDisplay.textContent = `Ставка: ${betAmount}`;
+                    betAmountDisplay.id = 'bet-amount-display';
+                    document.getElementById('fights-section').insertBefore(betAmountDisplay, loadingOpponent);
+                    startFight(betAmount);
+                } else {
+                    alert(data.error);
+                }
+            })
+            .catch(error => console.error('Error placing bet:', error));
+        });
+        
+        const showNotification = (message) => {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+        
+            setTimeout(() => {
+                notification.classList.add('visible');
+            }, 10);
+        
+            setTimeout(() => {
+                notification.classList.remove('visible');
+                setTimeout(() => {
+                    notification.remove();
+                }, 500);
+            }, 3000);
+        };
+        
+        // Используем showNotification в нужных местах
+        const startFight = (betAmount) => {
+            playerScore = 0;
+            botScore = 0;
+            coinsPerClick = 1; // Устанавливаем значение кликов в 1
+            playerScoreElement.textContent = playerScore;
+            botScoreElement.textContent = botScore;
+            showNotification('Подбор соперника...');
+        
+            setTimeout(() => {
+                showNotification('Ваш противник определен: ' + Math.floor(Math.random() * 1000000));
+                setTimeout(() => {
+                    document.querySelector('.notification').remove(); // Убираем последнее уведомление сразу
+                    fightArea.classList.remove('hidden');
+                    startBotScoring();
+                    startPlayerScoring();
+                    startFightTimer(); // Запуск таймера боя
+        
+                    setTimeout(() => endFight(betAmount), fightDuration); // Передаем betAmount в endFight
+                }, 2000);
+            }, 3000);
+        };
+        
+        const endFight = (betAmount) => { // Принимаем betAmount в endFight
+            clearInterval(botInterval);
+            clearInterval(timerInterval);
+            fightArea.classList.add('hidden');
+        
+            let resultMessage;
+            if (playerScore > botScore) {
+                resultMessage = `Вы победили и выиграли ${betAmount * 2} монет!`;
+                updatePlayerScore(betAmount * 2);
+            } else {
+                resultMessage = 'Вы проиграли. Попробуйте снова!';
+            }
+            fightResultTitle.textContent = 'Результат боя';
+            fightResultDescription.textContent = resultMessage;
+            fightResultModal.style.display = 'block'; // Убедитесь, что модальное окно отображается
+        
+            // Уменьшить количество оставшихся боев
+            remainingFights -= 1;
+            remainingFightsElement.textContent = remainingFights;
+        
+            // Установить время для следующего боя
+            nextFightTime = new Date(new Date().getTime() + cooldownSeconds * 1000);
+            startFightButton.disabled = false;
+        
+            // Показать скрытые элементы после окончания боя
+            fightResultModal.style.display = 'none';
+            document.querySelectorAll('#fights-section > .stats-box, #fights-section > .remaining-fights, #fights-section > .stat-item, #fights-section > input, #fights-section > button, #fights-section > .rules-box').forEach(function(element) {
+                element.classList.remove('hidden');
+            });
+            document.getElementById('bet-amount-display').remove();
+        };
+        
+        const startBotScoring = () => {
+            botInterval = setInterval(() => {
+                botScore += Math.floor(Math.random() * 10); // бот получает случайное количество очков
+                botScoreElement.textContent = botScore;
+            }, 1000);
+        };
+        
+        const startPlayerScoring = () => {
+            // Удаляем предыдущий обработчик, если он был
+            if (clickHandler) {
+                clickImage.removeEventListener('click', clickHandler);
+            }
+        
+            // Устанавливаем новый обработчик
+            clickHandler = (event) => {
+                playerScore++;
+                playerScoreElement.textContent = playerScore;
+                showClickValue(event.clientX, event.clientY, 1);
+            };
+            clickImage.addEventListener('click', clickHandler);
+            hapticFeedback.impactOccurred('light');
+        };
+        
+        const startFightTimer = () => {
+            let timeRemaining = fightDuration / 1000; // Время в секундах
+            fightTimerElement.textContent = timeRemaining;
+        
+            timerInterval = setInterval(() => {
+                timeRemaining--;
+                fightTimerElement.textContent = timeRemaining;
+                if (timeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                }
+            }, 1000);
+        };
+        
+        closeFightResult.onclick = function() {
+            fightResultModal.style.display = 'none';
+            startFightButton.classList.remove('hidden');
+            document.getElementById('bet-amount').classList.remove('hidden');
+            document.getElementById('bet-amount-display').remove();
+        };
+        
+        fightResultOkButton.onclick = function() {
+            fightResultModal.style.display = 'none';
+            startFightButton.classList.remove('hidden');
+            document.getElementById('bet-amount').classList.remove('hidden');
+            document.getElementById('bet-amount-display').remove();
+        };
+        
+        const updatePlayerScore = (amount) => {
+            fetch('', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fight_score: amount })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    score += amount; // Обновляем локальную переменную счета
+                    updateScore();
+                } else {
+                    console.error('Error updating fight score:', data.error);
+                }
+            })
+            .catch(error => console.error('Error updating fight score:', error));
+        };
+        
+        closeFightResult.onclick = function() {
+            fightResultModal.style.display = 'none';
+            startFightButton.classList.remove('hidden');
+            document.getElementById('bet-amount').classList.remove('hidden');
+            document.getElementById('bet-amount-display').remove();
+        };
+        
+        fightResultOkButton.onclick = function() {
+            fightResultModal.style.display = 'none';
+            startFightButton.classList.remove('hidden');
+            document.getElementById('bet-amount').classList.remove('hidden');
+            document.getElementById('bet-amount-display').remove();
+        };
+        
+        fighterImage.addEventListener('touchstart', (event) => {
+            event.preventDefault();
+            let clickValue = 1 + (upgrades[1].upgradereward || 0) + (upgrades[2].upgradereward || 0) + (upgrades[3]['upgradereward'] ?? 0);
+            let touches = event.touches;
+            for (let i = 0; i < touches.length; i++) {
+                score += clickValue;
+                showClickValue(touches[i].clientX, touches[i].clientY, clickValue);
+                if (navigator.vibrate) {
+                    navigator.vibrate(50); // Вибрация на 50 мс
+                }
+        
+                // Шансы выпадения сундуков
+                if (Math.random() < 0.00001) {
+                    tryAddChest('super_mega_chest', touches[i].clientX, touches[i].clientY);
+                } else if (Math.random() < 0.0001) {
+                    tryAddChest('referral_chest', touches[i].clientX, touches[i].clientY);
+                } else if (Math.random() < 0.001) {
+                    tryAddChest('common_chest', touches[i].clientX, touches[i].clientY);
+                }
+            }
+            updateScore();
+            hapticFeedback.impactOccurred('light');
+        }, { passive: false });
+        
+        // Попытка добавить сундук
+        function tryAddChest(chestType, x, y) {
+            fetch('', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'add_chest', chest_type: chestType })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log(`Сундук добавлен: ${chestType}`);
+                    chestInfo[chestType]++;
+                    updateChestQuantity(chestType, chestInfo[chestType]);
+                    showChestAnimation(x, y, chestType);
+                } else {
+                    console.error('Ошибка добавления сундука:', data.error);
+                }
+            })
+            .catch(error => console.error('Ошибка добавления сундука:', error));
+        }
+        
+        // Показать анимацию сундука
+        function showChestAnimation(x, y, chestType) {
+            const chestImage = document.createElement('img');
+            chestImage.src = getChestImageSrc(chestType);
+            chestImage.className = 'chest-animation';
+            chestImage.style.left = `${x - 20}px`;
+            chestImage.style.top = `${y - 40}px`;
+            document.getElementById('game-section').appendChild(chestImage);
+            
+            // Добавляем мощную вибрацию 3 раза
+            vibrateThreeTimes();
+            setTimeout(() => {
+                chestImage.classList.add('fade-out');
+                setTimeout(() => {
+                    chestImage.remove();
+                }, 3000);
+            }, 0);
+        }
+        
+        // Получить путь к изображению сундука
+        function getChestImageSrc(chestType) {
+            switch (chestType) {
+                case 'super_mega_chest':
+                    return '/image/super_mega_chest.png';
+                case 'referral_chest':
+                    return '/image/referral_chest.png';
+                case 'common_chest':
+                default:
+                    return '/image/common_chest.png';
+            }
+        }
+    
+    
+        // Вибрация три раза
+        function vibrateThreeTimes() {
+            let count = 0;
+            const interval = setInterval(() => {
+                hapticFeedback.impactOccurred('heavy');
+                count++;
+                if (count === 3) {
+                    clearInterval(interval);
+                }
+            }, 200); // Вибрация каждые 200мс
+        }
+            
+        
+        
+        
+        document.addEventListener('click', function(event) {
+            var inputField = document.getElementById('bet-amount');
+            if (inputField && !inputField.contains(event.target)) {
+                inputField.blur();
+            }
+        });
+        
+        
+        const inviteButton = document.getElementById('invite-button');
+        
+        if (inviteButton) {
+            inviteButton.addEventListener('click', function() {
+                if (window.Telegram && window.Telegram.WebApp) {
+                    window.Telegram.WebApp.ready();
+                    
+                    // Получаем реферальную ссылку
+                    const referralLink = document.querySelector('.referral-link a').href;
+                    
+                    // Формируем текст приглашения
+                    const inviteText = encodeURIComponent(`Присоединяйся к игре по моей реферальной ссылке: ${referralLink} и получи сразу вознаграждение в размере 75000`);
+                    
+                    // Открываем диалог выбора чата в Telegram
+                    window.Telegram.WebApp.openTelegramLink(`https://t.me/share/url?url=${inviteText}`);
+                } else {
+                    console.error('Telegram Web App API не доступен.');
+                    alert('Эта функция доступна только в Telegram Web App.');
+                }
+            });
+        } else {
+            console.error('Кнопка "Пригласить друзей" не найдена.');
+        }
+    
+    } else {
+            document.body.innerHTML = '<div style="text-align: center; padding: 20px;">Это приложение доступно только в Telegram.</div>';
+            return; // Прерываем выполнение остального кода
+        }
+});
+</script>
+
+</body>
+</html>
+
